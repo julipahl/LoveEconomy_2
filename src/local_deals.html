@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Local Deals</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/test.css" rel="stylesheet">
+
+  </head>
+
+
+  <body>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <a class="navbar-brand" href="index.html">LoveEconomy</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="local_deals.html">Current Deals</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="#">Users</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Sign-up
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="User_site.html">User Sign-up</a>
+                  <button type="button" class="dropdown-item" data-toggle="modal" data-target="#addBusiness">Add Business</button>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">User Login</a>
+                </div>
+              </li>
+              
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+              <a class="nav-link" href="#">QRCode Scanner</a>
+              <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+          </div>
+        </nav>
+
+    <div class="container">
+
+      <div class="starter-template">
+        <h1>Our Current available Deals</h1>
+        <p class="lead">Two-for-One deals by local businesses to help spread the resources</p>
+      </div>
+
+    </div>
+
+  <!-- deals available : this should be ajustable each time a business adds a deal -->
+
+<div style = "float:right; margin-right:5em" >
+  <div class="qrbox">
+    <img alt="qr-code"/>
+    <textarea></textarea>
+    <qrbutton>Generate QR Code</qrbutton>
+  </div>
+</div>
+
+<!-- Form to enter new deal -->
+<div style = "float:left; margin-left: 2em">
+  <section>
+    <h4>Businesses can add new deals here</h4>
+  <form class="card p-3 bg-light";>
+    <div className="form-group row">
+      <lable for="dealName" class="col-sm-2 col-form-label">Deal Name</lable>
+      <input id="dealName" type="text" style="margin-left: 2em"  required/>
+    </div>
+    <div className="form-group row" style="margin-top: 0.5em;">
+      <lable for="dealDetails" class="col-sm-2 col-form-label">Deal Details</lable>
+      <input id="dealDetails" type="text" style="margin-left: 1.5em" required/>
+    </div>
+    <div className="form-group row" style="margin-top: 0.5em;">
+      <lable for="expirationMonth" class="col-sm-2 col-form-label">Expiration Date</lable>
+      <input id="expirationMonth" type="text" style="margin-left: 0em" required/>
+    </div>
+    <div className="form-group row" style="margin-top: 0.5em;">
+      <lable for="price" class="col-sm-2 col-form-label">Price</lable>
+      <input id="price" type="text" style="margin-left: 4.5em" required/>
+    </div>
+    <button type="submit" class="btn btn-secondary" style="margin-top: 1em" onclick="App.addDeal(); return false; window.location.reload();">Add Product</button>
+  </form>
+</section>
+</div>
+
+<section>
+  <div style = "float:left; margin-left: 2em; margin-top: 2em">
+    <hr/>
+        <br/>
+        <div style="text-align: center">
+            <button type="button" class="btn btn-secondary text-center" onclick="App.displayActiveDeals(); return false">View all deals</button>
+        </div>
+    <hr/>
+    <table class="table table-sm" style="width: 1000px;" class="list" id="dealsList">
+      <thead class="thead-light">
+        <tr class= "table-primary">
+              <th scope="col">Business Name</th>
+              <th scope="col">Deal Name</th>
+              <th scope="col">Deal Details</th>
+              <th scope="col">Price</th>
+              <th scope="col">Sold</th>
+              <th scope="col">Expiration Date</th>
+              <th scope="col">Active<th>
+          </tr>
+      </thead>
+      <tbody id = "dealDetailsTable">
+      </tbody>
+    </table>
+  </div>
+  </section>    
+
+
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script> window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/main_js.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/web3.min.js"></script>
+    
+    
+  </body>
+</html>

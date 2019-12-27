@@ -1,2 +1,2 @@
-# LoveEconomy_2
-FinTech 2019 Thesis
+# TheSecretLoveProject
+Tracking the payments and the difference the Secret Love Project makes

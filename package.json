@@ -1,0 +1,24 @@
+{
+  "name": "love_economy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "lite-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "lite-server": "^2.5.4",
+    "truffle": "5.0.0-beta.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.4.0",
+    "datejs": "^1.0.0-rc3",
+    "openzeppelin-solidity": "^2.4.0"
+  }
+}
