@@ -112,8 +112,13 @@ contract LoveEconomy {
         userFee = _newFee;
     }
 
+    // function to call informations and run tests
     function getAllBusinesses() public view returns(address[] memory){
         return AllBusinesses;
+    }
+
+    function getAllUsers() public view returns(address[] memory){
+        return AllUsers;
     }
 
     function getBusinessDetails(address _businessWalletAddress) public view
@@ -125,7 +130,7 @@ contract LoveEconomy {
             businessAddresstoDetails[_businessWalletAddress].active
             );
 
-        }
+    }
 
 // function used by the business contract to create a require statement that the business has to be active before creating a new product
     function isActive(address _businessWalletAddress) public view returns (bool active) {

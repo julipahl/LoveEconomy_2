@@ -17,6 +17,7 @@ event DealCreated(
     address businessAddress, // which business contract the deal belongs to
     address tokenContractAddress,
     string dealName,
+    string dealDescription,
     uint price,
     uint expiryDate,
     bool active
@@ -30,7 +31,6 @@ struct Deal {
     string dealName; // can be two for one or % discount
     string dealDescription;
     uint price;
-    uint sold;
     uint expiryDate;
     bool active;
 }
@@ -68,24 +68,25 @@ function addDeal(string memory _dealName, string memory _dealDescription, uint _
                                                     _dealName,
                                                     _dealDescription,
                                                     _price,
-                                                    0,
                                                     _expiryDate,
                                                     true);
 
-    emit DealCreated(businessName, msg.sender, tokenContractAddress, _dealName, _price, _expiryDate, true);
+    emit DealCreated(businessName, msg.sender, tokenContractAddress, _dealName, _dealDescription,
+                        _price, _expiryDate, true);
     return(tokenContractAddress);
 }
 
+// function to return the number of deals created by the business
 function getDealCount() public view returns(uint){
         return tokenContracts.length;
 }
 
 // set a deal to no longer be active
-
 function setDealActiveFlag(address _tokenAddress, bool _active) public view {
         tokenAddressToDeal[_tokenAddress].active == _active;
 }
 
+// function to check whether the user is active
 function activeUser(address _userAddress) public view returns(bool) {
     return loveEconomy.isUserActive(_userAddress);
 }
@@ -95,29 +96,26 @@ function dealPrice(address _tokenAddress) public view returns(uint) {
     return tokenAddressToDeal[_tokenAddress].price;
 }
 
-// should not be public, but leaving it for now
-function purchaseDeal(address _tokenAddress) public view returns (uint) {
-    uint _sold = tokenAddressToDeal[_tokenAddress].sold;
-    _sold++;
-    return(_sold);
+function getBusinessAddress() public view returns(address) {
+    return owner;
 }
 
+// return the array of deals
 function getAllDeals() public view returns(address[] memory){
     return tokenContracts;
 }
 
 function getDealDetails(address _tokenAddress) public view
-        returns(string memory, string memory, string memory, uint,
-                uint, uint, bool) {
+        returns(string memory, address, string memory, string memory, uint,
+                uint) {
 
             return(
             tokenAddressToDeal[_tokenAddress].businessName,
+            tokenAddressToDeal[_tokenAddress].tokenContractAddress,
             tokenAddressToDeal[_tokenAddress].dealName,
             tokenAddressToDeal[_tokenAddress].dealDescription,
             tokenAddressToDeal[_tokenAddress].price,
-            tokenAddressToDeal[_tokenAddress].sold,
-            tokenAddressToDeal[_tokenAddress].expiryDate,
-            tokenAddressToDeal[_tokenAddress].active
+            tokenAddressToDeal[_tokenAddress].expiryDate
             );
 
         }

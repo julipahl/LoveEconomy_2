@@ -44,13 +44,13 @@ App = {
          App.contracts.LocalBusiness.setProvider(App.web3Provider);
     });
 
-    $.getJSON('DealsToken.json', function (DealToken) {
-     App.contracts.DealToken = TruffleContract(DealToken);
-     App.contracts.DealToken.setProvider(App.web3Provider);
+    $.getJSON('DealsToken.json', function (DealsToken) {
+     App.contracts.DealsToken = TruffleContract(DealsToken);
+     App.contracts.DealsToken.setProvider(App.web3Provider);
 });
 
 
-  },
+},
 
 // display some contact information
   
@@ -241,7 +241,7 @@ addDiscountCodeUser: function () {
    },
 
    // display all businesses if LoveEconomy is logged in 
-   displayBusinessDetails: function() {
+displayBusinessDetails: function() {
         
           var LoveEconomyInstance;
 
@@ -333,7 +333,14 @@ addDeal: function () {
 
      var _currentDate = new Date();
 
-     _expirationDate = new Date(_currentDate.setMonth(_currentDate.getMonth() + _expirationMonth)); // NOT WORKING
+     _date = new Date(_currentDate.setMonth(_currentDate.getMonth() + _expirationMonth)); // NOT WORKING
+     var day = _date.getDate();
+     var month = _date.getMonth();
+     var year = _date.getFullYear();
+
+     _expirationDate2 = day + "/" + month + "/" + year;
+
+     _expirationDate = _expirationMonth; // doing this for testing for now
 
      var _businessContractAddress;
    
@@ -347,7 +354,7 @@ addDeal: function () {
    // replaced App.account with web3.eth.accounts[1] for now
      console.log('Adding deal (' + _dealName + ') - Please check Metamask');
      console.log('Adding deal with (' + web3.eth.accounts[1] + ') account');
-     console.log("the expiration date is : " + _expirationDate);
+     console.log("the expiration date is : " + _expirationDate2);
      
      App.contracts.LoveEconomy.deployed().then(function(instance) {
           // call the App.account function, 
@@ -423,16 +430,16 @@ addDeal: function () {
                               App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
                                    businessContractInstance.getAllDeals().then(function(dealAddresses) {
                                         console.log("there are " + dealAddresses.length + " deals");
-                                        dealAddresses.forEach(dealWalletAddress => {
-                                             return businessContractInstance.getDealDetails(dealWalletAddress).then(function(dealDetails){
+                                        dealAddresses.forEach(dealContractAddress => {
+                                             
+                                             return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
                                                   App.showDeal(
                                                        dealDetails[0],
-                                                       dealDetails[1],
                                                        dealDetails[2],
                                                        dealDetails[3],
                                                        dealDetails[4],
                                                        dealDetails[5],
-                                                       dealDetails[6]
+                                                       dealDetails[1]
                                                   );
                                              })
                                         
@@ -450,32 +457,74 @@ addDeal: function () {
 },
 
 
-showDeal: function (ownerName, dealName, dealDescription, price, sold, expiryDate, active) {
+showDeal: function (ownerName, dealName, dealDescription, price, expiryDate, tokenAddress) {
      var businessName = ownerName;
      var name = dealName;
      var details = dealDescription;
      var dealPrice = price;
-     var numberSold = sold;
      var date = expiryDate;
-     var dealActive = active;
      var dealDetails = $("#dealDetailsTable");
+     var tokenContractAddress = tokenAddress;
 
      // add date combination here
 
      console.log("the business name is " + businessName + "the deal name is " + name + 
-                    "deal details are " + details  + "number sold " + dealPrice +
-                    "the price " + numberSold + "the expiry date is " + date +
-                    "active:" + dealActive)
+                    "deal details are " + details  + "number sold " + dealPrice + "the expiry date is " + date +
+                    "the token contract adddress is: " + tokenContractAddress)
      // Render candidate Result
      var dealTemplate = "<tr><th>" + ownerName + "</th><td>" + dealName + "</td><td>" + dealDescription + 
-                              "</td><td>" + price + "</td><td>" + sold + "</td><td>" +  expiryDate + 
-                              "</td><td>" + active + "</td></tr>"
+                         "</td><td>" + price + "</td><td>" + expiryDate + 
+                         "</td><td>" + 
+                         "<button type='button' id = " + tokenContractAddress + " onclick='App.BuyThisItem(this.id)' >Buy</button>" + "</td></tr>"
+                         // the above line sets the id of the button as the function input when the button is pressed.
      dealDetails.append(dealTemplate);
+
+
 },
 
 
+// error as there is a require function for the buyer to be a active user : check that this works
+BuyThisItem: function (tokenContractAddress) {
+     var _tokenAddress = tokenContractAddress;
+     var buyDealInstance;
+     
+     console.log("the token address is: " + tokenContractAddress)
+          // get current metamask logged in 
+       // refresh account info
+       App.displayAccountInfo();
+
+        // if the name is not provided or invalid address was provided
+        if ((web3.isAddress(App.account) != true)) {
+             // we cannot add a business
+             console.log('Cannot load user because name or address is invalid')
+             return false;
+        };
+
+     console.log('Purchasing deal (' + _tokenAddress + ') - Please check Metamask');
+   
+     App.contracts.DealsToken.at(_tokenAddress).then(function(instance) {
+          buyDealInstance = instance;
+
+          return buyDealInstance._dealPrice().then(function(_dealprice) {
+               console.log("the deal price is " + _dealprice);
+               buyDealInstance.purchaseDeal({
+                    from: web3.eth.accounts[9], // this needs to be the users account, as only active users can pruchase tokens
+                    gas: 5000000,
+                    value: _dealprice * 10**18,
+               });
+          })
+
+     }).then(function() {
+          console.log('new deal purchased');
+     }).catch(function(error) {
+          console.log(error);
+     });
+
+},
 
 };
+
+
 
 // initialize the app everytime the window loads
 $(function() {
