@@ -20,7 +20,7 @@
 
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="TestWebsite.html">LoveEconomy</a>
+        <a class="navbar-brand" href="index.html">LoveEconomy</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -31,17 +31,15 @@
               <a class="nav-link" href="local_deals.html">Current Deals</a>
             </li>
             <li class="nav-item active">
-              <a class="nav-link" href="#">Users</a>
+              <a class="nav-link" href="Users.html">Users</a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Sign-up
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="User_site.html">User Sign-up</a>
-                <a class="dropdown-item" href="businesses">Business Sign-up</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">User Login</a>
+                <a class="dropdown-item" href="#addDiscountCodeUser">User Sign-up</a>
+                <a class="dropdown-item" href="#addBusiness">Business Sign-up</a>
               </div>
             </li>
             
@@ -57,39 +55,64 @@
       <div class="container">
 
             <div class="starter-template">
-              <h1>User Sign-up</h1>
-              <p class="lead">Use your discount code to sign-up for free</p>
+              <h1>Redeem your tokens</h1>
+              <p class="lead">Use your tokens at your local businesses</p>
             </div>
       
         </div>
 
-       <!-- sign-up page for users -->
-      <!-- <body>
-       <form style="margin-top: 2em; margin-left: 5em; width: 60%;">
-            <div class="form-group">
-              <label for="exampleInputEmail1">User Address</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter User Address">
-              <small id="emailHelp" class="form-text text-muted">Please enter your wallet details here</small>
-            </div>
-            <div class="form-group">
-              <label for="exampleInputPassword1">User Name</label>
-              <input type="password" class="form-control" id="exampleInputPassword1" placeholder="User Name">
-            </div>
-            <div class="form-group form-check">
-              <input type="checkbox" class="form-check-input" id="exampleCheck1" onclick="dynInput(this);">
-              <label class="form-check-label" for="exampleCheck1">Use discount code</label>
-            </div>
-            <div style = "margin-top: 1em">
-                <p id="insertDiscountCode"></p>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-    
- -->
+      <div class="container">
+        <!--List fo current businesses on the LoveEconomy-->
+      <section>
+        <hr/>
+        <br/>
+        <div style="text-align: center">
+            <button type="button" class="btn btn-secondary text-center" onclick="App.TokenDisplay(); return false">View all activity</button>
+        </div>
 
+        <hr/>
 
+        <div id="tokensSold">
+          <table class="table table-sm" style="width: 1110px;">
+            <thead class="thead-light">
+              <tr class= "table-primary">
+                <th scope="col">Business Name</th>
+                <th scope="col">Deal name</th>
+                <th scope="col">Number of deals Sold</th>
+              </tr>
+            </thead>
+            <tbody id="tokenDetails">
+            </tbody>
+          </table>
+          </div>
+      </section>
 
+      </div>
+       
+    <section>
+      <div style = "margin-top: 5em;">
+
+        <hr/>
+        <br/>
+
+        <div style="margin-top: 1em; margin-left: 1em" class="form-group row">
+            <label for="ViewBusinessAddress" class="col-sm-2 col-form-label">Redeem user voucher here: </label>
+            <div>
+              <input type="text" class="form-control" id="ViewBusinessAddress" placeholder="User Address">
+            </div>
+            <button type="button" class="btn btn-secondary text-center" onclick="App.SearchBusinesses(); return false; window.location.reload()">Redeem</button>
+        </div>
+
+        <hr/>
+
+      </div>
+    </section>
+
+    <!-- loader -->
+
+  <div class="modal" id="token_loadingGIF" style="display:none; margin-left: 35em; margin-top: 10em;" >
+    <img id="loading-image" src="images/loader_gif.gif" />
+  </div>
 
 
        <!-- Placed at the end of the document so the pages load faster -->

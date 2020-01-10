@@ -56,7 +56,7 @@ function addDeal(string memory _dealName, string memory _dealDescription, uint _
     require(_price > 0, "price needs to be higher than zero"); //price needs to be more than 0
 
      // Deploy new token contract
-    DealsToken newTokenContract = new DealsToken();
+    DealsToken newTokenContract = new DealsToken(_dealName, _price);
     // Store the new contract address
     address tokenContractAddress = address(newTokenContract);
 
@@ -89,11 +89,6 @@ function setDealActiveFlag(address _tokenAddress, bool _active) public view {
 // function to check whether the user is active
 function activeUser(address _userAddress) public view returns(bool) {
     return loveEconomy.isUserActive(_userAddress);
-}
-
-// will use the address as an id
-function dealPrice(address _tokenAddress) public view returns(uint) {
-    return tokenAddressToDeal[_tokenAddress].price;
 }
 
 function getBusinessAddress() public view returns(address) {

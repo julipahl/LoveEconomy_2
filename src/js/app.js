@@ -75,7 +75,11 @@ displayAccountInfo: function () {
 },
 
 render: function() {
+     
+     var dealsSoldCounter;
+
      // show total number of businesses
+
      App.contracts.LoveEconomy.deployed().then(function(instance) {
           return instance.businessCount();
      }).then(function(result){
@@ -104,6 +108,8 @@ render: function() {
      }).catch(function(err) {
           console.error(err);
      });
+
+     $("#dealsUsed").html(dealsSoldCounter);
 
 
 },
@@ -244,7 +250,7 @@ addDiscountCodeUser: function () {
 displayBusinessDetails: function() {
         
           var LoveEconomyInstance;
-
+          $('#loadingGIF').show();
           // get current metamask logged in 
           // refresh account info
           App.displayAccountInfo();
@@ -269,6 +275,8 @@ displayBusinessDetails: function() {
                               
                          });
                     });
+
+                    $('#loadingGIF').hide();
 
                } else {
                     console.log("Only Master Account can display businesses not " + App.Account);
@@ -404,7 +412,8 @@ addDeal: function () {
      };
      App.loading = true;
 
-     
+     $('#deals_loadingGIF').modal({ show: true });
+
      var LoveEconomyInstance;
      var _businessContractAddress;
 
@@ -469,7 +478,7 @@ showDeal: function (ownerName, dealName, dealDescription, price, expiryDate, tok
      // add date combination here
 
      console.log("the business name is " + businessName + "the deal name is " + name + 
-                    "deal details are " + details  + "number sold " + dealPrice + "the expiry date is " + date +
+                    "deal details are " + details + "the deal price is " + dealPrice + "the expiry date is " + date +
                     "the token contract adddress is: " + tokenContractAddress)
      // Render candidate Result
      var dealTemplate = "<tr><th>" + ownerName + "</th><td>" + dealName + "</td><td>" + dealDescription + 
@@ -479,7 +488,7 @@ showDeal: function (ownerName, dealName, dealDescription, price, expiryDate, tok
                          // the above line sets the id of the button as the function input when the button is pressed.
      dealDetails.append(dealTemplate);
 
-
+     $('#deals_loadingGIF').modal("hide");
 },
 
 
@@ -487,7 +496,7 @@ showDeal: function (ownerName, dealName, dealDescription, price, expiryDate, tok
 BuyThisItem: function (tokenContractAddress) {
      var _tokenAddress = tokenContractAddress;
      var buyDealInstance;
-     
+
      console.log("the token address is: " + tokenContractAddress)
           // get current metamask logged in 
        // refresh account info
@@ -516,11 +525,109 @@ BuyThisItem: function (tokenContractAddress) {
 
      }).then(function() {
           console.log('new deal purchased');
+          dealsSoldCounter++;
+          console.log(dealsSoldCounter + " deals have been sold");
      }).catch(function(error) {
           console.log(error);
      });
 
 },
+
+// displaying the number of tokens already sold for a deal
+TokenDisplay: function() {
+     
+    // $("#loadingGIF").show();
+     $('#token_loadingGIF').modal({ show: true });
+
+     var LoveEconomyInstance;
+     var _businessContractAddress;
+
+     var _businessName;
+
+          // get current metamask logged in 
+       // refresh account info
+     App.displayAccountInfo();
+  
+       App.contracts.LoveEconomy.deployed().then(function(instance) {
+            LoveEconomyInstance = instance;
+
+               LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
+                    console.log("there are " + businessAddresses.length + " businesses");
+                    businessAddresses.forEach(businessWalletAddress => {
+                         return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
+                         
+                              if (businessDetails[2] != true) {
+                              console.log('This is not an active business. Customer cannot be loaded')
+                              } else {
+                              
+                              _businessName = businessDetails[0];
+                              _businessContractAddress = businessDetails[1];
+                              console.log("the business address is :" + _businessContractAddress);
+                              // now get instance of the business contract 
+                              App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
+                                   businessContractInstance.getAllDeals().then(function(dealAddresses) {
+                                        console.log("there are " + dealAddresses.length + " deals");
+                                        dealAddresses.forEach(dealContractAddress => {
+                                             return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
+                                         
+                                                  App.showTokenDetails(
+                                                       _businessName, 
+                                                       dealDetails[1],
+                                        
+                                                       );
+                                                  })
+                                             
+                                        });
+                              })
+                                   
+                              })
+                              } 
+                         });
+
+                        
+                    });
+                    
+                 });
+                 
+            })
+           
+     },
+                         
+
+showTokenDetails: async function (_businessName, _tokenAddress) {
+     var businessName = _businessName;
+     var dealContractAddress = _tokenAddress
+
+     console.log("the token address is " + dealContractAddress);
+
+     let dealsSold = await App.contracts.DealsToken.at(dealContractAddress).dealsBought();
+
+     let dealName = await App.contracts.DealsToken.at(dealContractAddress).dealName.call();
+     
+     var tokenDetails = $("#tokenDetails");
+     
+
+     // add date combination here
+
+     console.log("the business name is " + businessName + "the deal name is " + dealName + 
+                    "deals sold " + dealsSold)
+     // Render candidate Result
+     var tokenTemplate = "<tr><th>" + businessName + "</th><td>" + dealName + "</td><td>" + dealsSold + "</td></tr>"
+                         // the above line sets the id of the button as the function input when the button is pressed.
+     tokenDetails.append(tokenTemplate);
+
+     $('#token_loadingGIF').modal("hide");
+},
+
+
+
+// RedeemItem: function(userAddress) {
+
+
+// },
+
+
+
 
 };
 

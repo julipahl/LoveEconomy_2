@@ -8,31 +8,31 @@ contract DealsToken is ERC20 {
    address public businessContractAddress;
 
    address public tokenContractAddress;
+   string public dealName;
+   uint public dealPrice;
 
    uint public dealsBoughtCount;
 
    LocalBusiness businessContract;
 
-    constructor() public {
+    constructor(string memory _dealName, uint _price) public {
         businessContractAddress = msg.sender;
         // since the business contract will deploy the token contract once a deal is created, the msg.sender will be the business contract
         tokenContractAddress = address(this);
         businessContract = LocalBusiness(businessContractAddress);
+        dealName = _dealName;
+        dealPrice = _price;
     }
-
-    event dealPurchased(address _user, address _tokenAddress);
 
     // function to create a new and unique non-fungible token each time a user buys a deal on the platform
     // want to be able to map the token id to specific deal
     function purchaseDeal() public payable {
         require(businessContract.activeUser(msg.sender) == true, "the user purchasing a token must be an active user in the LoveEconomy");
-        require(msg.value >= businessContract.dealPrice(tokenContractAddress), "price paid should be atleast the price of the deal");
+        require(msg.value >= dealPrice, "price paid should be atleast the price of the deal");
 
         address _to = msg.sender; // the person calling this function will be the address who should receive the token
         dealsBoughtCount++;
         _mint(_to, 1);
-
-        emit dealPurchased(_to, tokenContractAddress);
     }
 
     // need to be able to approve and transfer token id's (if a user wants to sell their deal to another user)
@@ -56,15 +56,11 @@ contract DealsToken is ERC20 {
         _burn(_account, 1);
     }
 
-    // need to be able to burn the tokens once the deal is used
-
-
     // functions to extract information
 
     function _dealPrice() public view returns(uint) {
-        return businessContract.dealPrice(tokenContractAddress);
+        return dealPrice;
     }
-
 
     function _businessContractAddress() public view returns(address) {
         return (businessContractAddress);

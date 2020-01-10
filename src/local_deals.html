@@ -32,17 +32,15 @@
                 <a class="nav-link" href="local_deals.html">Current Deals</a>
               </li>
               <li class="nav-item active">
-                <a class="nav-link" href="#">Users</a>
+                <a class="nav-link" href="Users.html">Users</a>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   Sign-up
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="User_site.html">User Sign-up</a>
+                  <a class="dropdown-item" href="#addDiscountCodeUser">User Sign-up</a>
                   <button type="button" class="dropdown-item" data-toggle="modal" data-target="#addBusiness">Add Business</button>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">User Login</a>
                 </div>
               </li>
               
@@ -78,7 +76,7 @@
 <div style = "float:left; margin-left: 2em">
   <section>
     <h4>Businesses can add new deals here</h4>
-  <form class="card p-3 bg-light";>
+  <form id = "addDealForm" class="card p-3 bg-light";>
     <div className="form-group row">
       <lable for="dealName" class="col-sm-2 col-form-label">Deal Name</lable>
       <input id="dealName" type="text" style="margin-left: 2em"  required/>
@@ -126,6 +124,11 @@
   </section>    
 
 
+  <!-- loader -->
+
+  <div class="modal" id="deals_loadingGIF" style="display:none; margin-left: 35em; margin-top: 10em;"">
+    <img id="loading-image" src="images/loader_gif.gif" alt="Loading..."/>
+  </div>
 
 
     <!-- Bootstrap core JavaScript
