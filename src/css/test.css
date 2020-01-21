@@ -88,3 +88,14 @@ label.validation-error{
 .hide{
   display:none;
 }
+
+.exchangeRate {
+  outline: none;
+  height: 40px;
+  width: 150px;
+  padding: 1rem;
+  border: 2px solid #bada55;
+  border-radius: 0.5rem;
+  grid-column: 1/-1;
+}
+

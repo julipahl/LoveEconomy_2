@@ -28,6 +28,7 @@ contract LoveEconomy {
     address public owner; // this will be the LoveEconomy who is the owner of all the contracts
     uint private discountCode; // this will be the discount code at the time of contract deployment -> should be set to private and dynamic
     uint public userFee; // the fee will represent Wei, where the actual value recieved needs to be userFee * 10**18
+    uint public businessFee; // the fee that is required to be paid by the business to access the platform
 
     uint public userCount; // number of users on the system
     uint public businessCount; // number of local businesses
@@ -39,10 +40,11 @@ contract LoveEconomy {
 
 
 
-    constructor(uint _discountCode, uint _userFee) public {
+    constructor(uint _discountCode, uint _userFee, uint _businessFee) public {
         owner = msg.sender;
         discountCode = _discountCode;
         userFee = _userFee;
+        businessFee = _businessFee;
     }
 
     // events
@@ -57,9 +59,11 @@ contract LoveEconomy {
     // function to add a new local business to the LoveEconomy
     // make the function private, as we only want this contract to be able to add new businesses
 
-    function addBusiness(address _businessAddress, string memory _businessName) public {
+    // this should be made payable, so that the funds go to the LoveEconomy
+    function addBusiness(address _businessAddress, string memory _businessName) public payable {
         require(msg.sender == owner, "only the LoveEconomy can add new businesses"); // can only register once viable deal is aggreed upon
         require(businessAddresstoDetails[_businessAddress].active != true, "business already exists");
+        require(msg.value >= businessFee * 10**18, "the business needs to pay a minimum access fee");
 
         // Deploy new business contract
         LocalBusiness newBusinessContract = new LocalBusiness(_businessAddress, _businessName);
@@ -110,6 +114,13 @@ contract LoveEconomy {
     function updateUserFee(uint _newFee) public {
         require(msg.sender == owner, "only the LoveEconomy can change the fee charged to new users");
         userFee = _newFee;
+    }
+
+    // function to update the signup value for businesses,
+    // this can only be called by the LoveEconomy contract owner
+    function updateBusinessFee(uint _newFee) public {
+        require(msg.sender == owner, "only the LoveEconomy can change the fee charged to new businesses");
+        businessFee = _newFee;
     }
 
     // function to call informations and run tests

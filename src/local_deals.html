@@ -62,6 +62,20 @@
 
     </div>
 
+    <div class = "container">
+      <div class = "row">
+        <p>Current Account: </p>
+        <p id="account" style="margin-left:1em"></p>
+      </div>
+    </div>
+
+    <div class = "container">
+      <div class = "row" >
+          <p>Account Balance: </p>
+          <p id="accountBalance" style="margin-left:1em"></p>
+      </div>
+    </div>
+
   <!-- deals available : this should be ajustable each time a business adds a deal -->
 
 <div style = "float:right; margin-right:5em" >
@@ -86,8 +100,8 @@
       <input id="dealDetails" type="text" style="margin-left: 1.5em" required/>
     </div>
     <div className="form-group row" style="margin-top: 0.5em;">
-      <lable for="expirationMonth" class="col-sm-2 col-form-label">Expiration Date</lable>
-      <input id="expirationMonth" type="text" style="margin-left: 0em" required/>
+      <lable for="expirationMonth" class="col-sm-2 col-form-label">Expiration Time</lable>
+      <input id="expirationMonth" type="text" style="margin-left: 0em" required placeholder=" in months"/>
     </div>
     <div className="form-group row" style="margin-top: 0.5em;">
       <lable for="price" class="col-sm-2 col-form-label">Price</lable>
@@ -101,6 +115,12 @@
 <section>
   <div style = "float:left; margin-left: 2em; margin-top: 2em">
     <hr/>
+    
+    <div>
+      <button type="button" class="btn btn-secondary text-center" onclick="App.currencyConverter(); return false">ETH to Rand Converter</button>
+      <div style = "margin-left: 2em;" id = "ZARrate"></div>
+    </div>
+    
         <br/>
         <div style="text-align: center">
             <button type="button" class="btn btn-secondary text-center" onclick="App.displayActiveDeals(); return false">View all deals</button>
@@ -113,6 +133,7 @@
               <th scope="col">Deal Name</th>
               <th scope="col">Deal Details</th>
               <th scope="col">Price</th>
+              <th scope="col">Price in Rand</th>
               <th scope="col">Expiration Date</th>
               <th scope="col">Buy Deal<th>
           </tr>
@@ -137,12 +158,18 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script> window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/app.js"></script>
     <script src="js/main_js.js"></script>
     <script src="js/truffle-contract.js"></script>
     <script src="js/web3.min.js"></script>
     
+    <script> 
+      window.onload = function currencyConverter() { 
+          console.log('The Script will load now.'); 
+      } 
+    </script>
     
   </body>
 </html>

@@ -20,7 +20,9 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^2.4.0",
+    "@types/node": "^13.1.8",
     "datejs": "^1.0.0-rc3",
+    "https": "^1.0.0",
     "openzeppelin-solidity": "^2.4.0",
     "truffle-assertions": "^0.9.2"
   }

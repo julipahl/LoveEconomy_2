@@ -1,10 +1,11 @@
+var dealsSoldCounter;
+
 App = {
   web3Provider: null,
   contracts: {},
   account: '0x0',
   // existingLoveEconomyAddress: '0x0',
   // existingLoveEconomyAddress: '0x257D7d25CC9D9C753971D67bb13254f95dee280e',
-  
   
   init: function() {
     return App.initWeb3();
@@ -52,6 +53,10 @@ App = {
 
 },
 
+////////////////////
+//index site code//
+//////////////////
+
 // display some contact information
   
 displayAccountInfo: function () {
@@ -75,8 +80,6 @@ displayAccountInfo: function () {
 },
 
 render: function() {
-     
-     var dealsSoldCounter;
 
      // show total number of businesses
 
@@ -131,12 +134,17 @@ addBusiness: function () {
 
   console.log('Adding business (' + _businessName + ') - Please check Metamask');
   App.contracts.LoveEconomy.deployed().then(function(instance) {
-       // call the addBusiness function, 
-       // passing the business name and the business wallet address
-       return instance.addBusiness(_businessAddress, _businessName, {
+          // first the businessFee needs to be called, to get the correct amount the business needs to pay
+          return instance.businessFee().then(function(fee) {
+          
+          // call the addBusiness function, 
+          // passing the business name and the business wallet address
+          instance.addBusiness(_businessAddress, _businessName, {
             from: App.account,
-            gas: 5000000
+            gas: 5000000,
+            value: fee * 10**18,
        });
+     })
   }).then(function (receipt) {
        console.log(receipt.logs[0].args._businessName + ' added');
        businessContractAddress = receipt.logs[0].args._businessContractAddress;
@@ -328,6 +336,10 @@ showBusiness: function (name, address, contractAddress, active) {
      businessDetails.append(businessTemplate);
 },
 
+//////////////////////////
+//local_deals site code//
+////////////////////////
+
 // adding new deals
 
 addDeal: function () {
@@ -388,7 +400,7 @@ addDeal: function () {
           console.log(result.logs[0].args.businessAddress + ' added');
           console.log(result.logs[0].args.tokenContractAddress + ' added');
           console.log(result.logs[0].args.dealName + ' added');
-          console.log(result.logs[0].args.dealDescription + ' added');
+          console.log(result.logs[0].args.dealDetails + ' added');
           console.log(result.logs[0].args.price + ' added');
           console.log(result.logs[0].args.expiryDate + ' added');
           console.log(result.logs[0].args.active + ' added');
@@ -405,7 +417,7 @@ addDeal: function () {
 
    // displaying all the deals and their details
 
-   displayActiveDeals: function() {
+   displayActiveDeals: async function() {
      
      if (App.loading) {
           return;
@@ -416,6 +428,8 @@ addDeal: function () {
 
      var LoveEconomyInstance;
      var _businessContractAddress;
+     var exchangeRate = await App.ETHtoZAR();
+     console.log("the exchange rate is currently: " + exchangeRate);
 
           // get current metamask logged in 
        // refresh account info
@@ -448,7 +462,8 @@ addDeal: function () {
                                                        dealDetails[3],
                                                        dealDetails[4],
                                                        dealDetails[5],
-                                                       dealDetails[1]
+                                                       dealDetails[1],
+                                                       exchangeRate
                                                   );
                                              })
                                         
@@ -466,13 +481,14 @@ addDeal: function () {
 },
 
 
-showDeal: function (ownerName, dealName, dealDescription, price, expiryDate, tokenAddress) {
+showDeal: function (ownerName, dealName, dealDetails, price, expiryDate, tokenAddress, exchangeRate) {
      var businessName = ownerName;
      var name = dealName;
-     var details = dealDescription;
+     var details = dealDetails;
      var dealPrice = price;
      var date = expiryDate;
-     var dealDetails = $("#dealDetailsTable");
+     var dealDetailsTable = $("#dealDetailsTable");
+     var ZARprice = price * exchangeRate;
      var tokenContractAddress = tokenAddress;
 
      // add date combination here
@@ -481,14 +497,58 @@ showDeal: function (ownerName, dealName, dealDescription, price, expiryDate, tok
                     "deal details are " + details + "the deal price is " + dealPrice + "the expiry date is " + date +
                     "the token contract adddress is: " + tokenContractAddress)
      // Render candidate Result
-     var dealTemplate = "<tr><th>" + ownerName + "</th><td>" + dealName + "</td><td>" + dealDescription + 
-                         "</td><td>" + price + "</td><td>" + expiryDate + 
+     var dealTemplate = "<tr><th>" + ownerName + "</th><td>" + dealName + "</td><td>" + dealDetails + 
+                         "</td><td>" + price + "</td><td>" + ZARprice + 
+                         "</td><td>" +  expiryDate + 
                          "</td><td>" + 
                          "<button type='button' id = " + tokenContractAddress + " onclick='App.BuyThisItem(this.id)' >Buy</button>" + "</td></tr>"
                          // the above line sets the id of the button as the function input when the button is pressed.
-     dealDetails.append(dealTemplate);
+     dealDetailsTable.append(dealTemplate);
 
      $('#deals_loadingGIF').modal("hide");
+},
+
+// return ETH to rand exchange rate function 
+// get currency exchange 
+   
+currencyConverter: async function () {
+
+     const ETHexchange = await App.ETHtoZAR();
+     console.log(ETHexchange);
+     document.getElementById("ZARrate").innerHTML = "1 ETH = " + ETHexchange + " Rand";
+         
+},
+
+ETHtoZAR: async function() {
+     
+     var getFullURL = function(url, options){
+          const params = [];
+          for (let key in options) {
+              params.push(`${key}=${options[key]}`);
+          }
+          return url + '?' + params.join("&");
+      }
+      
+      var apiKey = "048784013e3c60bcdeadec8128a13f600a84fc9f9d0840007a49edcb4af6020d";
+      var baseUrl = "https://min-api.cryptocompare.com/data/price"
+      
+      var options = {
+          api_key: apiKey,
+          fsym: "ETH",
+          tsyms: "ZAR"
+      };
+      
+      var fullURL = getFullURL(baseUrl, options);
+     
+      
+      const response = await axios.get(fullURL);
+      const object = await response.data;
+
+      const ETH = await object.ZAR;
+     
+      console.log(ETH);
+     return(ETH);
+   
 },
 
 
@@ -532,6 +592,12 @@ BuyThisItem: function (tokenContractAddress) {
      });
 
 },
+
+/////////////////////
+// User site code //
+///////////////////
+
+// displaying product details when page loads
 
 // displaying the number of tokens already sold for a deal
 TokenDisplay: function() {
@@ -620,15 +686,6 @@ showTokenDetails: async function (_businessName, _tokenAddress) {
 },
 
 
-
-// RedeemItem: function(userAddress) {
-
-
-// },
-
-
-
-
 };
 
 
@@ -665,18 +722,6 @@ $(function() {
      });
    });
 
-
-   
-
-  // lite-server: run using 
-  // npm run dev
-
-/////////////////////
-// User site code //
-///////////////////
-
-// displaying product details when page loads
-
 /////////////////
 // QR code js //
 ///////////////
@@ -704,5 +749,11 @@ function select(el) {
    
      qrcode.src = url; // this means that everytime the function is run, it will update the image with the new qr code
    
-   }
+   };
+
    
+
+  // lite-server: run using 
+  // npm run dev
+
+

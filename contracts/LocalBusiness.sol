@@ -17,7 +17,7 @@ event DealCreated(
     address businessAddress, // which business contract the deal belongs to
     address tokenContractAddress,
     string dealName,
-    string dealDescription,
+    string dealDetails,
     uint price,
     uint expiryDate,
     bool active
@@ -29,7 +29,7 @@ struct Deal {
     address businessContractAddress;
     address tokenContractAddress; // could be used as the id
     string dealName; // can be two for one or % discount
-    string dealDescription;
+    string dealDetails;
     uint price;
     uint expiryDate;
     bool active;
@@ -49,7 +49,7 @@ constructor(address _businessAddress, string memory _businessName) public {
 }
 
 
-function addDeal(string memory _dealName, string memory _dealDescription, uint _expiryDate, uint _price) public returns(address) {
+function addDeal(string memory _dealName, string memory _dealDetails, uint _expiryDate, uint _price) public returns(address) {
     require(msg.sender == owner, "Only the business contract owner can create new deals");
     require(loveEconomy.isActive(owner) == true, "the business must be active currently");
     // the business that is creating this deal must be active
@@ -66,12 +66,12 @@ function addDeal(string memory _dealName, string memory _dealDescription, uint _
                                                     address(this),
                                                     tokenContractAddress,
                                                     _dealName,
-                                                    _dealDescription,
+                                                    _dealDetails,
                                                     _price,
                                                     _expiryDate,
                                                     true);
 
-    emit DealCreated(businessName, msg.sender, tokenContractAddress, _dealName, _dealDescription,
+    emit DealCreated(businessName, msg.sender, tokenContractAddress, _dealName, _dealDetails,
                         _price, _expiryDate, true);
     return(tokenContractAddress);
 }
@@ -108,7 +108,7 @@ function getDealDetails(address _tokenAddress) public view
             tokenAddressToDeal[_tokenAddress].businessName,
             tokenAddressToDeal[_tokenAddress].tokenContractAddress,
             tokenAddressToDeal[_tokenAddress].dealName,
-            tokenAddressToDeal[_tokenAddress].dealDescription,
+            tokenAddressToDeal[_tokenAddress].dealDetails,
             tokenAddressToDeal[_tokenAddress].price,
             tokenAddressToDeal[_tokenAddress].expiryDate
             );
