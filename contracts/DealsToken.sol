@@ -9,13 +9,13 @@ contract DealsToken is ERC20 {
 
    address public tokenContractAddress;
    string public dealName;
-   uint public dealPrice;
+   uint8 public dealPrice;
 
-   uint public dealsBoughtCount;
+   uint24 public dealsBoughtCount;
 
    LocalBusiness businessContract;
 
-    constructor(string memory _dealName, uint _price) public {
+    constructor(string memory _dealName, uint8 _price) public {
         businessContractAddress = msg.sender;
         // since the business contract will deploy the token contract once a deal is created, the msg.sender will be the business contract
         tokenContractAddress = address(this);
@@ -27,8 +27,8 @@ contract DealsToken is ERC20 {
     // function to create a new and unique non-fungible token each time a user buys a deal on the platform
     // want to be able to map the token id to specific deal
     function purchaseDeal() public payable {
-        require(businessContract.activeUser(msg.sender) == true, "the user purchasing a token must be an active user in the LoveEconomy");
         require(msg.value >= dealPrice, "price paid should be atleast the price of the deal");
+        //require(businessContract.userActiveStatus(msg.sender) == true, "User can only purchase deals if active");
 
         address _to = msg.sender; // the person calling this function will be the address who should receive the token
         dealsBoughtCount++;
@@ -39,9 +39,7 @@ contract DealsToken is ERC20 {
     // not sure how to make the recipient pay?
     function sellToken(uint _amount, address _recipient) public payable {
         require(msg.sender != address(0) && msg.sender != tokenContractAddress, "sender cannot be the zero address or the contract itself");
-        // require(msg.value == businessContract.dealPrice(tokenContractAddress) * 10**18,
-        //    "price paid must be bigger or equal to price of the product");
-        require(businessContract.activeUser(_recipient) == true, "the recepient of the token must be an active user");
+        //require(businessContract.userActiveStatus(_recipient) == true, "User can only recieve deals if active");
 
         address _sender = msg.sender;
         _transfer(_sender, _recipient, _amount);
@@ -57,7 +55,6 @@ contract DealsToken is ERC20 {
     }
 
     // functions to extract information
-
     function _dealPrice() public view returns(uint) {
         return dealPrice;
     }

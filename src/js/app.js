@@ -1,11 +1,13 @@
-var dealsSoldCounter;
+const web3_utils = require('web3-utils');
 
 App = {
   web3Provider: null,
   contracts: {},
   account: '0x0',
+  
   // existingLoveEconomyAddress: '0x0',
   // existingLoveEconomyAddress: '0x257D7d25CC9D9C753971D67bb13254f95dee280e',
+
   
   init: function() {
     return App.initWeb3();
@@ -22,6 +24,8 @@ App = {
       App.web3Provider = new Web3.providers.HttpProvider('http://127.0.0.1:7545');
       web3 = new Web3(App.web3Provider);
     }
+    App.displayAccountInfo();
+
     return App.initContract();
   },
 
@@ -58,7 +62,6 @@ App = {
 //////////////////
 
 // display some contact information
-  
 displayAccountInfo: function () {
      web3.eth.getCoinbase(function (err, account) {
           // if there is no error
@@ -78,6 +81,7 @@ displayAccountInfo: function () {
           }
      })
 },
+
 
 render: function() {
 
@@ -112,10 +116,20 @@ render: function() {
           console.error(err);
      });
 
-     $("#dealsUsed").html(dealsSoldCounter);
-
-
 },
+
+// function to display the ether to be paid to sign upt for the LoveEconomy for businesses
+businessFee: function() {
+     // show total number of businesses
+     App.contracts.LoveEconomy.deployed().then(function(instance) {
+          return instance.businessFee();
+     }).then(function(result){
+          console.log(result);
+          $("#businessFeeValue").html(result + " ether");
+     }).catch(function(err) {
+          console.error(err);
+     });
+ },
 
 //adding a new business: only LoveEconomy address can add businesses
 
@@ -134,22 +148,22 @@ addBusiness: function () {
 
   console.log('Adding business (' + _businessName + ') - Please check Metamask');
   App.contracts.LoveEconomy.deployed().then(function(instance) {
-          // first the businessFee needs to be called, to get the correct amount the business needs to pay
-          return instance.businessFee().then(function(fee) {
-          
           // call the addBusiness function, 
           // passing the business name and the business wallet address
-          instance.addBusiness(_businessAddress, _businessName, {
+        return  instance.addBusiness(_businessAddress, _businessName, {
             from: App.account,
-            gas: 5000000,
-            value: fee * 10**18,
+            gas: 5000000
        });
-     })
+
+     
   }).then(function (receipt) {
        console.log(receipt.logs[0].args._businessName + ' added');
        businessContractAddress = receipt.logs[0].args._businessContractAddress;
        console.log('Business contract address: ' + businessContractAddress);
-       return businessContractAddress;
+
+      // alert("You have successfully signed up on the LoveEconomy")
+  }).then(function () {
+          alert("a new business has been added");
   }).catch(function (error) {
        console.log(error);
   });
@@ -172,7 +186,8 @@ addDiscountCodeUser: function () {
           _discountBool = "true";
           _discountCodeUsed = $('#txtDiscountCode').val();
      } 
-  
+
+     
         // if the name is not provided or invalid address was provided
         if ((_userName.trim() == '') || (web3.isAddress(_userAddress) != true)) {
              // we cannot add a business
@@ -183,16 +198,20 @@ addDiscountCodeUser: function () {
   
      console.log('Adding user (' + _userName + ') - Please check Metamask');
      console.log('your discount bool is ' + _discountBool);
-     console.log("Your discount code used is " + _discountCodeUsed);
+     console.log("Your discount code used is " + String(_discountCodeUsed));
+
+     // console.log("the first address is " + web3.isAddress(_userAddress));
+     console.log(web3_utils.soliditySha3("'"+_discountCodeUsed+"'"));
+
      App.contracts.LoveEconomy.deployed().then(function(instance) {
           // call the addBusiness function, 
           // passing the business name and the business wallet address
-          return instance.addDiscountCodeUser(_userAddress, _userName, _discountBool, _discountCodeUsed, {
+          return instance.addDiscountCodeUser(_userAddress, _userName, _discountBool,  web3.utils.keccak256(_discountCodeUsed), {
                from: App.account,
                gas: 5000000
           });
      }).then(function () {
-          console.log(' new user added');
+          alert('You have successfully signed up on the LoveEconomy');
      }).catch(function (error) {
           console.log(error);
      });
@@ -247,7 +266,8 @@ addDiscountCodeUser: function () {
                });
           })
      }).then(function () {
-          console.log(' new user added');
+          // console.log(' new user added');
+          alert("You have successfully signed up on the LoveEconomy");
      }).catch(function (error) {
           console.log(error);
      });
@@ -379,6 +399,9 @@ addDeal: function () {
      App.contracts.LoveEconomy.deployed().then(function(instance) {
           // call the App.account function, 
           // pass the current business address active to add a new deal
+          // instance.businessFee().then(function(fee){
+          //      businessFee = fee;
+          // })
           return instance.getBusinessDetails(web3.eth.accounts[1]);
      }).then(function(businessDetails) {
           
@@ -393,7 +416,8 @@ addDeal: function () {
           console.log('Adding deal ' + _dealName );
           return businessInstance.addDeal(_dealName, _dealDetails, _expirationDate, _price, {
                from: web3.eth.accounts[1],
-               gas: 6700000
+               gas: 6700000,
+            //   value: businessFee * 10 ** 18
           });
      }).then(function(result){
           console.log(result.logs[0].args.businessName + ' added');
@@ -409,6 +433,9 @@ addDeal: function () {
 
           return dealContractAddress;
           // log the error if there is one
+
+     }).then(function(){
+          alert("A new deal has been added");
      }).catch(function (error) {
           console.log(error);
      });
@@ -585,8 +612,7 @@ BuyThisItem: function (tokenContractAddress) {
 
      }).then(function() {
           console.log('new deal purchased');
-          dealsSoldCounter++;
-          console.log(dealsSoldCounter + " deals have been sold");
+          // alert("You have just purchased a new deal!"); 
      }).catch(function(error) {
           console.log(error);
      });
@@ -688,8 +714,6 @@ showTokenDetails: async function (_businessName, _tokenAddress) {
 
 };
 
-
-
 // initialize the app everytime the window loads
 $(function() {
      $(window).load(function() {
@@ -737,7 +761,7 @@ function select(el) {
    let qrtext = select("textarea");
    let qrbutton = select("qrbutton");
    
-   qrbutton.addEventListener("click", generateQR);
+  // qrbutton.addEventListener("click", generateQR);
    
    function generateQR() {
      let size = "1000x1000";

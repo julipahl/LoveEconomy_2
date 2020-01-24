@@ -6,7 +6,8 @@ import "./DealsToken.sol";
 contract LocalBusiness {
 
 address public owner;
-address public LoveEconomyAddress;
+address payable public LoveEconomyAddress;
+bool public paid = false; // changes when the business paid their fee to the LoveEconomy
 
 LoveEconomy loveEconomy;
 
@@ -42,14 +43,23 @@ mapping (address => Deal) public tokenAddressToDeal;
 
 // set owner of newly created business contract to the business address that created the contract
 constructor(address _businessAddress, string memory _businessName) public {
-    LoveEconomyAddress = msg.sender; // not too sure whether this is correct
+    LoveEconomyAddress = msg.sender; // address of the LoveEconomy contract
     owner = _businessAddress;
     businessName = _businessName;
     loveEconomy = LoveEconomy(LoveEconomyAddress);
 }
 
+function activateContract() public payable {
+    require(msg.sender == owner, "Only the business contract can all this function");
+    require(msg.value >= loveEconomy.businessFee(), "the value must be bigger or equal to the business fee");
+    require(paid == false, "business has already paid the fee");
 
-function addDeal(string memory _dealName, string memory _dealDetails, uint _expiryDate, uint _price) public returns(address) {
+    paid = true;
+    address(LoveEconomyAddress).transfer(msg.value);
+}
+
+
+function addDeal(string memory _dealName, string memory _dealDetails, uint _expiryDate, uint8 _price) public payable returns(address) {
     require(msg.sender == owner, "Only the business contract owner can create new deals");
     require(loveEconomy.isActive(owner) == true, "the business must be active currently");
     // the business that is creating this deal must be active
@@ -84,11 +94,6 @@ function getDealCount() public view returns(uint){
 // set a deal to no longer be active
 function setDealActiveFlag(address _tokenAddress, bool _active) public view {
         tokenAddressToDeal[_tokenAddress].active == _active;
-}
-
-// function to check whether the user is active
-function activeUser(address _userAddress) public view returns(bool) {
-    return loveEconomy.isUserActive(_userAddress);
 }
 
 function getBusinessAddress() public view returns(address) {

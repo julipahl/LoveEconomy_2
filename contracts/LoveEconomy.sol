@@ -12,8 +12,6 @@ contract LoveEconomy {
         bool active;
     }
 
-// add a smart contract that has the details of the deals for the business? maybe the price, two-for-one or discount, expiration date?
-
 // object to store Love Economy user details
     struct user {
         string userName;
@@ -21,28 +19,26 @@ contract LoveEconomy {
         bool active;
     }
 
-    address[] public AllUsers;
+    address[] public AllUsers; // array holding all user addresses
 
-    address[] public AllBusinesses;
+    address[] public AllBusinesses; // array holding all business addresses
 
     address public owner; // this will be the LoveEconomy who is the owner of all the contracts
-    uint private discountCode; // this will be the discount code at the time of contract deployment -> should be set to private and dynamic
-    uint public userFee; // the fee will represent Wei, where the actual value recieved needs to be userFee * 10**18
-    uint public businessFee; // the fee that is required to be paid by the business to access the platform
+    bytes32 private discountCodeHashed; // this will be the discount code at the time of contract deployment
+    uint8 public userFee; // the fee will represent Wei, where the actual value recieved needs to be userFee * 10**18
+    uint8 public businessFee; // the fee that is required to be paid by the business to access the platform
 
-    uint public userCount; // number of users on the system
-    uint public businessCount; // number of local businesses
+    uint24 public userCount; // number of users on the system
+    uint24 public businessCount; // number of local businesses
 
-    uint public discountCodeCount; // number of discount codes used
+    uint24 public discountCodeCount; // number of discount codes used
 
     mapping(address => local_business) public businessAddresstoDetails; // id based lookup for businesses
     mapping(address => user) public userAddresstoDetails; // id based look up for users
 
-
-
-    constructor(uint _discountCode, uint _userFee, uint _businessFee) public {
+    constructor(string memory _discountCode, uint8 _userFee, uint8 _businessFee) public {
         owner = msg.sender;
-        discountCode = _discountCode;
+        discountCodeHashed = keccak256(abi.encodePacked(_discountCode));
         userFee = _userFee;
         businessFee = _businessFee;
     }
@@ -59,18 +55,15 @@ contract LoveEconomy {
     // function to add a new local business to the LoveEconomy
     // make the function private, as we only want this contract to be able to add new businesses
 
-    // this should be made payable, so that the funds go to the LoveEconomy
-    function addBusiness(address _businessAddress, string memory _businessName) public payable {
+    function addBusiness(address _businessAddress, string memory _businessName) public {
         require(msg.sender == owner, "only the LoveEconomy can add new businesses"); // can only register once viable deal is aggreed upon
         require(businessAddresstoDetails[_businessAddress].active != true, "business already exists");
-        require(msg.value >= businessFee * 10**18, "the business needs to pay a minimum access fee");
 
         // Deploy new business contract
         LocalBusiness newBusinessContract = new LocalBusiness(_businessAddress, _businessName);
         // Store the new contract address
         address businessContractAddress = address(newBusinessContract);
         AllBusinesses.push(_businessAddress);
-
 
         businessCount++;
         // update the business details and add to the array
@@ -80,13 +73,12 @@ contract LoveEconomy {
 
     // new users signing up to platform
     // discount code is a bool: whether one was used or not
-    function addDiscountCodeUser(address _userAddress, string memory _userName, bool _discountCodeUsed, uint _discountCode) public {
+    function addDiscountCodeUser(address _userAddress, string memory _userName, bool _discountCodeUsed, bytes32 _discountCode) public {
         require(userAddresstoDetails[_userAddress].active != true, "This customer is already registered");
-        require(_discountCode == discountCode, "Not the correct Code"); // check that the correct dicount code was added
-        //require(msg.sender == _userAddress, "only the active user can add themselves to the LoveEconomy");
+        require(_discountCode == discountCodeHashed, "Not the correct Code");
+        // check that the correct dicount code was added
 
         discountCodeCount++;
-
         userCount ++;
         userAddresstoDetails[_userAddress] = user(_userName, _discountCodeUsed, true);
         AllUsers.push(_userAddress);
@@ -97,7 +89,6 @@ contract LoveEconomy {
     function addUser(address _userAddress, string memory _userName) public payable {
         require(userAddresstoDetails[_userAddress].active != true, "This customer is already registered");
         require(msg.value >= userFee * 10**18, "Not enough ether"); // check that the correct dicount code was added
-        //require(msg.sender == _userAddress, "only the active user can add themselves to the LoveEconomy");
 
         userCount ++;
         userAddresstoDetails[_userAddress] = user(_userName, false, true);
@@ -105,20 +96,20 @@ contract LoveEconomy {
     }
 
     // Allow LoveEconomy to activate or deactivate businesses on the platform
-    function setActiveFlag(address _businessWalletAddress, bool _active) public {
-        require(msg.sender == owner, "Only LoveEconomy can change the active flag of a business.");
-        businessAddresstoDetails[_businessWalletAddress].active = _active;
-    }
+        // function setActiveFlag(address _businessWalletAddress, bool _active) public {
+        //     require(msg.sender == owner, "Only LoveEconomy can change the active flag of a business.");
+        //     businessAddresstoDetails[_businessWalletAddress].active = _active;
+        // }
 
     // function to update the signup value, this can only be called by the LoveEconomy contract owner
-    function updateUserFee(uint _newFee) public {
+    function updateUserFee(uint8 _newFee) public {
         require(msg.sender == owner, "only the LoveEconomy can change the fee charged to new users");
         userFee = _newFee;
     }
 
     // function to update the signup value for businesses,
     // this can only be called by the LoveEconomy contract owner
-    function updateBusinessFee(uint _newFee) public {
+    function updateBusinessFee(uint8 _newFee) public {
         require(msg.sender == owner, "only the LoveEconomy can change the fee charged to new businesses");
         businessFee = _newFee;
     }
@@ -143,14 +134,14 @@ contract LoveEconomy {
 
     }
 
-// function used by the business contract to create a require statement that the business has to be active before creating a new product
+    // function used by the business contract to create a require statement that the business has to be active before creating a new product
     function isActive(address _businessWalletAddress) public view returns (bool active) {
-
         return(businessAddresstoDetails[_businessWalletAddress].active);
     }
-    /// be able to add new discount codes by love economy?
 
-    function isUserActive(address _userAddress) public view returns(bool active) {
-        return(userAddresstoDetails[_userAddress].active);
+    // function to recieve ether from the business contracts
+    // fallback function
+    function() external payable {
+
     }
 }
