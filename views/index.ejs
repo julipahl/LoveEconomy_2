@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>The LoveEconomy</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/test.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="index.html">LoveEconomy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="local_deals.html">Current Deals</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="Users.html">Users</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sign-up
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#addDiscountCodeUser">User Sign-up</a>
+                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#addBusiness">Add Business</button>
+              </div>
+            </li>
+            
+          </ul>
+          <form class="form-inline my-2 my-lg-0">
+            <a class="nav-link" href="local_deals.html">QRCode Scanner</a>
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+          </form>
+        </div>
+      </nav>
+
+    <div class="container">
+
+      <div class="starter-template">
+        <h1>The LoveEconomy ❤️</h1>
+        <p class="lead">Our LoveEconomy helps local businesses grow, while distributing resources to the homeless</p>
+      </div>
+
+    </div>
+
+    <div class = "container">
+      <div class = "row">
+        <p>Current Account: </p>
+        <p id="account" style="margin-left:1em"></p>
+      </div>
+    </div>
+
+    <div class = "container">
+      <div class = "row" >
+          <p>Account Balance: </p>
+          <p id="accountBalance" style="margin-left:1em"></p>
+      </div>
+    </div>
+
+    <!-- start of business section -->
+    <section id="businesses">
+    <div class="card" style = "margin-left: 5em; margin-right: 5em;">
+        <h5 class="card-header">Local Businesses</h5>
+        <div class="card-body">
+          <div class="row">
+            <h5 class="card-title" style= "margin-left:1em">Number of Businesses signed onto our system:  </h5>
+            <h5 id="numberOfBusinesses" type="text" style= "margin-left:1em"></h5>
+          </div>
+          <div class="row">
+            <p class="card-text" style= "margin-left:2em" >Increased business through LoveEconomy:  </p>
+            <p id="dealsUsed" type="text"></p>
+          </div>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBusiness" onclick="App.businessFee(); return false;">Add Business</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- start of user section -->
+    <section id="users" style = "margin-top: 4em;">
+        <div class="card" style = "margin-left: 5em; margin-right: 5em;">
+            <h5 class="card-header">Our users</h5>
+            <div class="card-body">
+              <div class="row">
+                <h5 class="card-title" style= "margin-left:1em">Number of LoveEconomy Users : </h5>
+                <h5 id="numberOfUsers" type="text" style= "margin-left:1em"></h5>
+              </div>
+              <div class="row">
+                <p class="card-text" style= "margin-left:2em">Number of special stickers sold: </p>
+                <p id="discountCodesUsed" type="text" style= "margin-left:1em"></p>
+              </div>
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addDiscountCodeUser">Sign up with discount code</button>
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addUser" onclick="App.userFee(); return false;">Sign up with ether</button>
+            </div>
+          </div>
+    </section>
+
+    <!-- Adding  new business -->
+
+    <!-- should only be accessible with LoveEconomy wallet-->
+ 
+    <div class="modal" id="addBusiness" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add new Business</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div style="margin-top: 1em;">
+              <h10 class="modal-title" style="margin-left: 2em; color: crimson;"> Only the LoveEconomy can add new Businesses</h10>
+            </div>
+            <div style="margin-top: 1em;">
+              <h12 class="modal-title" style="margin-left: 2em; color: crimson;"> Join our community for: </h12>
+              <h12 id="businessFeeValue" type="text" style= "margin-left:1em"></h12>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form id="businessForm"></form>
+                            <div class="form-group">
+                                <label for="BusinessName">Business name</label>
+                                <input type="text" class="form-control" id="BusinessName" placeholder="Name">
+                                <label for="BusinessAddress" style="margin-top: 1em;">Business address</label>
+                                <input type="text" class="form-control" id="BusinessAddress" placeholder="Address">
+                            </div>
+                          </form>
+                          <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="App.addBusiness(); return false; window.location.reload();">Add</button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--- Sign up for of new users using discount code -->
+        <div class="modal" id="addDiscountCodeUser" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">User Sign-up</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div style="margin-top: 1em;">
+                  <h10 class="modal-title" style="margin-left: 2em; color: crimson;"> Join our community using the code on your sticker pack</h10>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <form id="discountUserForm"></form>
+                                <div class="form-group">
+                                    <label for="discountCodeUserName">User name</label>
+                                    <input type="text" class="form-control" id="discountCodeUserName" placeholder="Name">
+                                    <label for="discountCodeUserAddress" style="margin-top: 1em;">User address</label>
+                                    <input type="text" class="form-control" id="discountCodeUserAddress" placeholder="Address">
+                                </div>
+                                <div>
+                                  <div class="form-group form-check">
+                                    <input type="checkbox" class="form-check-input" id="chkDiscountCode">
+                                    <label class="form-check-label" for="chkDiscountCode">Use discount code </label>
+                                  </div>
+
+                                  <div style = "margin-top: 1em; display: none" id="dvDiscountCode">
+                                      Discount Code:
+                                      <input type="text" id="txtDiscountCode"/>
+                                  </div>
+                                </div>
+                              </form>
+                              <div class="modal-footer" style= "margin: 1em">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="App.addDiscountCodeUser(); return false; window.location.reload();">Add</button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+        <!--- Sign up for of new users without discount code: using a payable function-->
+        <div class="modal" id="addUser" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">User Sign-up</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div style="margin-top: 1em;">
+                <h10 class="modal-title" style="margin-left: 2em; color: crimson;"> Join our community for: </h10>
+                <h10 id="userFeeValue" type="text" style= "margin-left:1em"></h5>
+              </div>
+              <div class="modal-body">
+                  <div class="row">
+                      <div class="col-lg-12">
+                          <form id="userForm"></form>
+                              <div class="form-group">
+                                  <label for="UserName">User name</label>
+                                  <input type="text" class="form-control" id="UserName" placeholder="Name">
+                                  <label for="UserAddress" style="margin-top: 1em;">User address</label>
+                                  <input type="text" class="form-control" id="UserAddress" placeholder="Address">
+                              </div>
+                            </form>
+                            <div class="modal-footer" style= "margin: 1em">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="App.addUser(); return false; window.location.reload();">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+            
+      <!--List fo current businesses on the LoveEconomy-->
+      <section>
+        <hr/>
+        <br/>
+        <div style="text-align: center">
+            <button type="button" class="btn btn-secondary text-center" onclick="App.displayBusinessDetails(); return false">View all businesses</button>
+        </div>
+
+        <div style="margin-top: 1em; margin-left: 1em" class="form-group row">
+            <label for="ViewBusinessAddress" class="col-sm-2 col-form-label">Search Business by address: </label>
+            <div>
+              <input type="text" class="form-control" id="ViewBusinessAddress" placeholder="Business Address">
+            </div>
+            <button type="button" class="btn btn-secondary text-center" onclick="App.SearchBusinesses(); return false; window.location.reload()">Search</button>
+        </div>
+
+        <hr/>
+
+        <div id="businesses" style="margin-left: 7em">
+          <table class="table table-sm" style="width: 1200px;">
+            <thead class="thead-light">
+              <tr class= "table-primary">
+                <th scope="col">Business Name</th>
+                <th scope="col">Business Wallet Address</th>
+                <th scope="col">Business Contract Address</th>
+                <th scope="col">Currently Active</th>
+              </tr>
+            </thead>
+            <tbody id="businessDetails">
+            </tbody>
+          </table>
+          </div>
+      </section>
+
+      <div id="footer" class="container">
+          <hr/>
+          <nav class="navbar navbar-default navbar-fixed-bottom">
+             
+          </nav>
+      </div>
+
+          
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+
+   <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script> window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>  <!-- for easy use of API -->
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bundle.js"></script>
+    <script src="js/main_js.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/web3.min.js"></script>
+    
+  </body>
+</html>
+
+
+<!--
+
+
+<div class="modal-header">
+    <h5 class="modal-title"> Add deal offered by this business</h5>
+</div>
+<div class="form-group" style="margin-top: 2em">  
+<label for="BusinessDealName">Deal Name</label>
+<input type="text" class="form-control" id="BusinessDealName" placeholder="Deal Name">
+<label for="BusinessDealType" style="margin-top: 1em;">Deal Type</label>
+<input type="text" class="form-control" id="BusinessDealType" placeholder="Deal Type">
+<label for="BusinessDealValue" style="margin-top: 1em;">Deal Value</label>
+<input type="text" class="form-control" id="BusinessDealValue" placeholder="Deal Value">
+</div>
+
+-->

@@ -13844,7 +13844,7 @@ App = {
       web3 = new Web3(web3.currentProvider);
     } else {
       // specify default instance if no web3 is provided
-      App.web3Provider = new Web3.providers.HttpProvider('http://127.0.0.1:7545');
+      App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
       web3 = new Web3(App.web3Provider);
     }
     App.displayAccountInfo();
