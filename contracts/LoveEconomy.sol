@@ -1,18 +1,19 @@
-pragma solidity >=0.4.21 <0.6.0;
+pragma solidity >=0.4.21 <0.6.2;
 
 import "./LocalBusiness.sol";
 
 contract LoveEconomy {
 
- // create object to store local businesses that sign up for the Love Economy
+ // object to store local businesses that sign up for the Love Economy
 
     struct local_business {
         string businessName;
-        address businessContractAddress; // not sure whether I need this yet
+        address businessContractAddress;
         bool active;
     }
 
 // object to store Love Economy user details
+
     struct user {
         string userName;
         bool discountCodeUsed; // whether the user signed in using a discount code
@@ -134,8 +135,7 @@ contract LoveEconomy {
 
     }
 
-    // function used by the business contract to create a require statement that the business has to be active before creating a new product
-    function isActive(address _businessWalletAddress) public view returns (bool active) {
+    function isActive(address _businessWalletAddress) public view returns(bool active) {
         return(businessAddresstoDetails[_businessWalletAddress].active);
     }
 

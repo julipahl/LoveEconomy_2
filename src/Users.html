@@ -75,33 +75,38 @@
         </div>
       </div>
 
-      <div class="container">
-        <!--List fo current businesses on the LoveEconomy-->
+      <hr>
+
       <section>
-        <hr/>
-        <br/>
-        <div style="text-align: center">
-            <button type="button" class="btn btn-secondary text-center" onclick="App.TokenDisplay(); return false">View all activity</button>
-        </div>
-
-        <hr/>
-
-        <div id="tokensSold">
-          <table class="table table-sm" style="width: 1110px;">
+          
+          <div>
+            <button style = "margin: 1em;" type="button" class="btn btn-secondary text-center" onclick="App.currencyConverter(); return false">ETH to Rand Converter</button>
+            <div style = "margin-left: 2em;" id = "ZARrate"></div>
+          </div>
+          
+              <div style="text-align: center">
+                  <button type="button" class="btn btn-secondary text-center" onclick="App.displayActiveDeals(); return false">View all deals</button>
+              </div>
+       
+          <table style = "margin-top: 2em;" class="table table-sm" class="list" id="dealsList">
             <thead class="thead-light">
               <tr class= "table-primary">
-                <th scope="col">Business Name</th>
-                <th scope="col">Deal name</th>
-                <th scope="col">Number of deals Sold</th>
-              </tr>
+                    <th scope="col">Business Name</th>
+                    <th scope="col">Deal Name</th>
+                    <th scope="col">Deal Details</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Price in Rand</th>
+                    <th scope="col">Expiration Date</th>
+                    <th scope="col">Buy Deal<th>
+                </tr>
             </thead>
-            <tbody id="tokenDetails">
+            <tbody id = "dealDetailsTable">
             </tbody>
           </table>
-          </div>
-      </section>
+   
+        </div>
+        </section>    
 
-      </div>
        
     <section>
       <div style = "margin-top: 5em;">

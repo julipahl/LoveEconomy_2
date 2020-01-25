@@ -76,6 +76,22 @@
       </div>
     </div>
 
+    <!-- Activate Business here-->
+    <div style = "margin-left: 2em; margin-top: 1em;" >
+    <h6> See whether your business has been activated: </h6§>
+      <div class="form-group" style="margin-top: 1em;">
+        <button type="button" class="btn btn-secondary text-center" onclick="App.payFee(); return false; window.location.reload()">Pay activation Fee</button>
+          <div>
+          <input style="margin-top: 1em; width: 300px;" type="text" class="form-control" id="businessActivated" placeholder="Business Contract Address">
+          </div>
+          <div style="margin-top: 1em; width: 300px; color: crimson;" type="text" id="displayBusinessStatus" ></div>
+
+      </div>
+    </div>
+
+
+    <hr/>
+
   <!-- deals available : this should be ajustable each time a business adds a deal -->
 
 <div style = "float:right; margin-right:5em" >
@@ -87,7 +103,7 @@
 </div>
 
 <!-- Form to enter new deal -->
-<div style = "float:left; margin-left: 2em">
+<div style = "float:left; margin-left: 2em; margin-top: 2em;">
   <section>
     <h4>Businesses can add new deals here</h4>
   <form id = "addDealForm" class="card p-3 bg-light";>
@@ -112,37 +128,34 @@
 </section>
 </div>
 
+<div class="container">
+  <!--List fo current deals on the LoveEconomy-->
 <section>
-  <div style = "float:left; margin-left: 2em; margin-top: 2em">
-    <hr/>
-    
-    <div>
-      <button type="button" class="btn btn-secondary text-center" onclick="App.currencyConverter(); return false">ETH to Rand Converter</button>
-      <div style = "margin-left: 2em;" id = "ZARrate"></div>
-    </div>
-    
-        <br/>
-        <div style="text-align: center">
-            <button type="button" class="btn btn-secondary text-center" onclick="App.displayActiveDeals(); return false">View all deals</button>
-        </div>
-    <hr/>
-    <table class="table table-sm" style="width: 1000px;" class="list" id="dealsList">
+  <div style = "float:left; margin-left: 2em; margin-top: 1em">
+
+  <div style="text-align: center">
+      <button type="button" class="btn btn-secondary text-center" onclick="App.TokenDisplay(); return false">View all activity</button>
+  </div>
+
+  <hr/>
+
+  <div id="tokensSold">
+    <table class="table table-sm" style="width: 1110px;">
       <thead class="thead-light">
         <tr class= "table-primary">
-              <th scope="col">Business Name</th>
-              <th scope="col">Deal Name</th>
-              <th scope="col">Deal Details</th>
-              <th scope="col">Price</th>
-              <th scope="col">Price in Rand</th>
-              <th scope="col">Expiration Date</th>
-              <th scope="col">Buy Deal<th>
-          </tr>
+          <th scope="col">Business Name</th>
+          <th scope="col">Deal name</th>
+          <th scope="col">Number of deals Sold</th>
+        </tr>
       </thead>
-      <tbody id = "dealDetailsTable">
+      <tbody id="tokenDetails">
       </tbody>
     </table>
+    </div>
   </div>
-  </section>    
+  </section>
+
+</div>
 
 
   <!-- loader -->
