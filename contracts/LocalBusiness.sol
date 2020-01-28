@@ -61,10 +61,10 @@ function activateContract() public payable {
 
 function addDeal(string memory _dealName, string memory _dealDetails, uint _expiryDate, uint8 _price) public payable returns(address) {
     require(msg.sender == owner, "Only the business contract owner can create new deals");
-    //require(active == true, "the business must be active currently");
+    require(loveEconomy.isActive(msg.sender) == true, "the business must be active currently");
     // the business that is creating this deal must be active
-    require(_price > 0, "price needs to be higher than zero"); //price needs to be more than 0
-    //require(paid == true, "the business can only add a new deal once the businessfee has been paid");
+    //require(_price > 0, "price needs to be higher than zero"); //price needs to be more than 0
+    require(paid == true, "the business can only add a new deal once the businessfee has been paid");
 
      // Deploy new token contract
     DealsToken newTokenContract = new DealsToken(_dealName, _price);

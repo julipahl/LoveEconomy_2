@@ -22,9 +22,10 @@ App = {
     } else {
       // specify default instance if no web3 is provided
       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+     //const provider = ganache.provider();
       web3 = new Web3(App.web3Provider);
     }
-    App.displayAccountInfo();
+    // App.displayAccountInfo();
 
     return App.initContract();
   },
@@ -39,7 +40,7 @@ App = {
          App.contracts.LoveEconomy.setProvider(App.web3Provider);
 
          //update account info
-         App.displayAccountInfo();
+         //App.displayAccountInfo();
 
          return App.render();
     });
@@ -115,6 +116,34 @@ render: function() {
      }).catch(function(err) {
           console.error(err);
      });
+
+     App.contracts.LoveEconomy.deployed().then(function(instance) {
+          return instance.getBusinessDetails(App.account).then(function(result){
+               console.log(result[1]);
+               $("currentBusinessContracts").html(" " + result[1]);
+          }).catch(function(err){
+               $("currentBusinessContracts").html("none");
+          })
+     });
+
+     web3.eth.getCoinbase(function (err, account) {
+          // if there is no error
+          if (err === null) {
+               //set the App object's account variable
+               App.account = account;
+               // insert the account address in the p-tag with id='account'
+               $("#account").html(account);
+               console.log(account);
+               // retrieve the balance corresponding to that account
+               web3.eth.getBalance(account, function (err, balance) {
+                    // if there is no error
+                    if (err === null) {
+                         // insert the balance in the p-tag with id='accountBalance'
+                         $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
+                    }
+               });
+          }
+     })
 
 },
 
@@ -360,22 +389,6 @@ showBusiness: async function (name, address, contractAddress, active) {
      businessDetails.append(businessTemplate);
 },
 
-getPaidStatus: function(businessContractAddress) {
-     var businessPaidStatus;
-
-     App.contracts.LocalBusiness.at(businessContractAddress).then(function(instance) {
-          return instance.paid.call().then(function(paid){
-               // console.log(paid);
-               businessPaidStatus = paid;
-               console.log(businessPaidStatus);
-               return businessPaidStatus
-          });
-     });
-
-     return businessPaidStatus;
-
-},
-
 //////////////////////////
 //local_deals site code//
 ////////////////////////
@@ -399,14 +412,16 @@ businessPaidStatus: function () {
                console.log("will display details");
                
                businessInstance.paid().then(function(paid){
-                    businessDetails.html(paid);
+                   if(paid == true){
+                    businessDetails.html("the business has paid its fee")
+                   } ;
                });
              //  } else {
              //    console.log("Only Master Account can display businesses not " + App.Account);
            //   }
 
        })
-           $('#deals_loadingGIF').modal({ show: false });
+       $('#deals_loadingGIF').modal("hide");
      
 },
 
@@ -416,41 +431,57 @@ payFee: function() {
      $('#deals_loadingGIF').modal({ show: true });
 
      var businessInstance;
+     var businessFee;
      var businessDetails = $("#displayBusinessStatus");
      var businessContract = $("#businessActivated").val();
 
      // get current metamask logged in 
        // refresh account info
        App.displayAccountInfo();
-  
-       App.contracts.LocalBusiness.at(businessContract).then(function(instance) {
-          businessInstance = instance;
-            return businessInstance.owner();
 
-          }).then(function(owner){
-            if(owner == App.account) {
-                 return businessInstance.paid();
-               } else {
-                    console.log("Only the Business contract owner can pay this fee ");
-               }
-          }).then(function(paid){
-               
-               if(paid == true) {
+       App.contracts.LoveEconomy.deployed().then(function(instance) {
+          return instance.businessFee();
+               }).then(function(fee) {
+                    businessFee = fee; }).then(function() {
+          
+          App.contracts.LocalBusiness.at(businessContract).then(function(instance) {
+               businessInstance = instance;
+               return businessInstance.owner();
 
-                    console.log("contract fee of " + businessSearch + " will be paid")
-                         businessInstance.activateContract().then(function(){
-                              console.log("you have successfully paid 2 ether to activate your contract");
-                    });
+               }).then(function(owner){
+               if(owner == web3.eth.accounts[1]) {
+                    return businessInstance.paid();
+                    } else {
+                         console.log("Only the Business contract owner can pay this fee ");
+                    }
+               }).then(function(paid){
+                    
+                    if(paid == false) {
 
+                              businessInstance.activateContract({
+                                   from: web3.eth.accounts[1],
+                                   gas: 5000000,
+                                   value: businessFee * 10**18,}).then(function(){
+                                   console.log("you have successfully paid 2 ether to activate your contract");
+                                   businessDetails.html("You have successfully paid, please add your first deal");
+                         });
+                         $('#deals_loadingGIF').modal("hide");
+                         
 
-               } else {
-                    console.log("you have already paid the fee");
-                    businessDetails.html("this business has paid");
-               }
+                    } else {
+                         console.log("you have already paid the fee");
+                         businessDetails.html("this business has paid");
+                         $('#deals_loadingGIF').modal("hide");
+                    }
+               })
+
           });
-                
-          $('#deals_loadingGIF').modal({ show: true });
+               
+          
+   
 },
+
+//0x8be240d6dc65183554440fb4e321e0631cbb0ea2
 
 // adding new deals
 
@@ -541,7 +572,7 @@ addDeal: function () {
 TokenDisplay: function() {
      
     // $("#loadingGIF").show();
-     $('#token_loadingGIF').modal({ show: true });
+     $('#deals_loadingGIF').modal({ show: true });
 
      var LoveEconomyInstance;
      var _businessContractAddress;
@@ -620,7 +651,7 @@ showTokenDetails: async function (_businessName, _tokenAddress) {
                          // the above line sets the id of the button as the function input when the button is pressed.
      tokenDetails.append(tokenTemplate);
 
-     $('#token_loadingGIF').modal("hide");
+     $('#deals_loadingGIF').modal("hide");
 },
 
     /////////////////////
@@ -636,7 +667,7 @@ showTokenDetails: async function (_businessName, _tokenAddress) {
      };
      App.loading = true;
 
-     $('#deals_loadingGIF').modal({ show: true });
+     $('#token_loadingGIF').modal({ show: true });
 
      var LoveEconomyInstance;
      var _businessContractAddress;
@@ -712,12 +743,12 @@ showDeal: function (ownerName, dealName, dealDetails, price, expiryDate, tokenAd
      var dealTemplate = "<tr><th>" + ownerName + "</th><td>" + dealName + "</td><td>" + dealDetails + 
                          "</td><td>" + price + "</td><td>" + ZARprice + 
                          "</td><td>" +  expiryDate + 
-                         "</td>" + 
-                         "<button type='button' id = " + tokenContractAddress + " onclick='App.BuyThisItem(this.id)' >Buy</button>" + "</tr>"
+                         "</td><td>" + 
+                         "<button type='button' id = " + tokenContractAddress + " onclick='App.BuyThisItem(this.id)' >Buy</button>" + "</td></tr>"
                          // the above line sets the id of the button as the function input when the button is pressed.
      dealDetailsTable.append(dealTemplate);
 
-     $('#deals_loadingGIF').modal("hide");
+     $('#token_loadingGIF').modal("hide");
 },
 
 // return ETH to rand exchange rate function 
@@ -789,7 +820,7 @@ BuyThisItem: function (tokenContractAddress) {
           return buyDealInstance._dealPrice().then(function(_dealprice) {
                console.log("the deal price is " + _dealprice);
                buyDealInstance.purchaseDeal({
-                    from: web3.eth.accounts[9], // this needs to be the users account, as only active users can pruchase tokens
+                    from: web3.eth.accounts[2], // this needs to be the users account, as only active users can pruchase tokens
                     gas: 5000000,
                     value: _dealprice * 10**18,
                });

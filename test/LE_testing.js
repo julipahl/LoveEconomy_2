@@ -13,6 +13,7 @@ var customer_address3;
 var discountCode = "LoveEconomy12345";
 
 var userFee = 1;
+var businessFee = 2;
 var deal_price = 1
 
 
@@ -42,8 +43,10 @@ contract("LoveEconomy", function(accounts) {
         var LoveEconomyIntance;
         return LoveEconomy.deployed().then(function(instance){
             LoveEconomyIntance = instance;
-            LoveEconomyIntance.addBusiness(business_address1, "TestBusiness", {from: LoveEconomy_account})
-        }).then(function(){
+            return LoveEconomyIntance.addBusiness(business_address1, "TestBusiness", {from: LoveEconomy_account})
+        }).then(function(result){
+            business_contract_address1 = result.logs[0].args._businessContractAddress;
+        }).then(function(){  
             return LoveEconomyIntance.businessCount.call();
 
         }).then(function(businessCount){
@@ -185,6 +188,35 @@ it("should add both users to allUsers array", function() {
 
 // tests for the Local_Business contracts
 
+//test that business fee is paid correctly
+it("should allow business to change paid status to true if 2 ethers are paid", function(){
+    var businessInstance;    
+
+    return LocalBusiness.at(business_contract_address2).then(function(instance){
+        businessInstance = instance;
+        businessInstance.activateContract({from: business_address2, value: businessFee * 10 * 18});
+    }).then(function(){
+        return businessInstance.paid();
+    }).then(function(paid){
+        assert.equal(paid, true, "the paid variable should be changed to true");
+    })
+});
+
+// should allow business contract 2 to add a new deal to it's contract
+// also tests that the deal is correctly added to AllDeals array
+it("should allow the business contract owner to add new deals when business fee was paid", function(){
+    return LocalBusiness.at(business_contract_address2).then(function(instance){
+        businessContractInstance = instance;
+        return businessContractInstance.addDeal("testDeal_1", "TwoForOne", 3, deal_price, {from: business_address2});
+    }).then(function(result){
+        dealContractAddress = result.logs[0].args.tokenContractAddress;
+        return businessContractInstance.getAllDeals();
+    }).then(function(deals){
+        assert.equal(deals[0], dealContractAddress, "the length should be equal to one");
+    });
+    
+});
+
 // only the business can add new deals
 // testing with business_address2 contract
 it("should only allow the business contract owner to add new deals", function(){
@@ -197,20 +229,17 @@ it("should only allow the business contract owner to add new deals", function(){
     
 });
 
-// should allow business contract 2 to add a new deal to it's contract
-// also tests that the deal is correctly added to AllDeals array
-it("should allow the business contract owner to add new deals", function(){
-    return LocalBusiness.at(business_contract_address2).then(function(instance){
+// test that a business who hasnt paid the business fee ether fee cannot be add a new deal
+it("should only allow the business to add new deals if business fee is paid", function(){
+    return LocalBusiness.at(business_contract_address1).then(function(instance){
         businessContractInstance = instance;
-        return businessContractInstance.addDeal("testDeal_1", "TwoForOne", 3, deal_price, {from: business_address2});
-    }).then(function(result){
-        dealContractAddress = result.logs[0].args.tokenContractAddress;
-        return businessContractInstance.getAllDeals();
-    }).then(function(deals){
-        assert.equal(deals[0], dealContractAddress, "the length should be equal to one");
-    });
+            truffleAssert.reverts(
+                businessContractInstance.addDeal("testDeal_1", "TwoForOne", 3, 1, {from: business_address1}))
+    
+    })
     
 });
+
 
 // test that the correct event is emited when a new deal is added
 
