@@ -1,4 +1,5 @@
 const web3_utils = require('web3-utils');
+const Web3 = require("web3");
 
 App = {
   web3Provider: null,
@@ -15,17 +16,8 @@ App = {
 
   // initial connection of client side application to local blockchain
   initWeb3: function() {
-    if (typeof wed3 !== "undefined") {
-      // if a web3 instance is already provided by MetaMask
-      App.web3Provider = web3.currentProvider;
-      web3 = new Web3(web3.currentProvider);
-    } else {
-      // specify default instance if no web3 is provided
-      App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
-     //const provider = ganache.provider();
-      web3 = new Web3(App.web3Provider);
-    }
-    // App.displayAccountInfo();
+     App.web3Provider = new Web3(Web3.givenProvider || "ws://localhost:8545");
+     App.web3Provider = web3
 
     return App.initContract();
   },
@@ -64,23 +56,25 @@ App = {
 
 // display some contact information
 displayAccountInfo: function () {
-     web3.eth.getCoinbase(function (err, account) {
-          // if there is no error
-          if (err === null) {
-               //set the App object's account variable
-               App.account = account;
-               // insert the account address in the p-tag with id='account'
-               $("#account").html(account);
-               // retrieve the balance corresponding to that account
-               web3.eth.getBalance(account, function (err, balance) {
-                    // if there is no error
-                    if (err === null) {
-                         // insert the balance in the p-tag with id='accountBalance'
-                         $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
-                    }
-               });
-          }
-     })
+     web3.eth.getAccounts(async function(err, account) {
+       // if there is no error
+       if (err === null) {
+         //set the App object's account variable
+         let accounts = await web3.eth.accounts;
+         console.log("accounts");
+         App.account = accounts[0];
+         // insert the account address in the p-tag with id='account'
+         $("#account").html(App.account);
+         // retrieve the balance corresponding to that account
+         web3.eth.getBalance(App.account, function(err, balance) {
+           // if there is no error
+           if (err === null) {
+             // insert the balance in the p-tag with id='accountBalance'
+             $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
+           }
+         });
+       }
+     });
 },
 
 
@@ -126,24 +120,29 @@ render: function() {
           })
      });
 
-     web3.eth.getCoinbase(function (err, account) {
-          // if there is no error
-          if (err === null) {
-               //set the App object's account variable
-               App.account = account;
-               // insert the account address in the p-tag with id='account'
-               $("#account").html(account);
-               console.log(account);
-               // retrieve the balance corresponding to that account
-               web3.eth.getBalance(account, function (err, balance) {
-                    // if there is no error
-                    if (err === null) {
-                         // insert the balance in the p-tag with id='accountBalance'
-                         $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
-                    }
-               });
-          }
-     })
+     web3.eth.getAccounts(async function(err, account) {
+       // if there is no error
+       if (err === null) {
+         //set the App object's account variable
+         console.log("GOT ACCOUNT");
+         console.log(account);
+         console.log(web3);
+         App.account = account[0];
+         // insert the account address in the p-tag with id='account'
+         $("#account").html(App.account);
+         console.log("SET");
+         console.log(App.account);
+         // retrieve the balance corresponding to that App.account
+         web3.eth.getBalance(App.account, function(err, balance) {
+           // if there is no error
+           if (err === null) {
+             // insert the balance in the p-tag with id='accountBalance'
+             $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
+           }
+         });
+       }
+       console.log(err);
+     });
 
 },
 
@@ -571,62 +570,62 @@ addDeal: function () {
 // displaying the number of tokens already sold for a deal
 TokenDisplay: function() {
      
-    // $("#loadingGIF").show();
-     $('#deals_loadingGIF').modal({ show: true });
+// $("#loadingGIF").show();
+$('#deals_loadingGIF').modal({ show: true });
 
-     var LoveEconomyInstance;
-     var _businessContractAddress;
+var LoveEconomyInstance;
+var _businessContractAddress;
 
-     var _businessName;
+var _businessName;
 
-          // get current metamask logged in 
-       // refresh account info
-     App.displayAccountInfo();
-  
-       App.contracts.LoveEconomy.deployed().then(function(instance) {
-            LoveEconomyInstance = instance;
+     // get current metamask logged in 
+     // refresh account info
+App.displayAccountInfo();
 
-               LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
-                    console.log("there are " + businessAddresses.length + " businesses");
-                    businessAddresses.forEach(businessWalletAddress => {
-                         return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
-                         
-                              if (businessDetails[2] != true) {
-                              console.log('This is not an active business. Customer cannot be loaded')
-                              } else {
-                              
-                              _businessName = businessDetails[0];
-                              _businessContractAddress = businessDetails[1];
-                              console.log("the business address is :" + _businessContractAddress);
-                              // now get instance of the business contract 
-                              App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
-                                   businessContractInstance.getAllDeals().then(function(dealAddresses) {
-                                        console.log("there are " + dealAddresses.length + " deals");
-                                        dealAddresses.forEach(dealContractAddress => {
-                                             return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
-                                         
-                                                  App.showTokenDetails(
-                                                       _businessName, 
-                                                       dealDetails[1],
-                                        
-                                                       );
-                                                  })
-                                             
-                                        });
-                              })
-                                   
-                              })
-                              } 
-                         });
+App.contracts.LoveEconomy.deployed().then(function(instance) {
+     LoveEconomyInstance = instance;
 
-                        
-                    });
+     LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
+          console.log("there are " + businessAddresses.length + " businesses");
+          businessAddresses.forEach(businessWalletAddress => {
+               return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
+               
+                    if (businessDetails[2] != true) {
+                    console.log('This is not an active business. Customer cannot be loaded')
+                    } else {
                     
-                 });
-                 
-            })
-           
-     },
+                    _businessName = businessDetails[0];
+                    _businessContractAddress = businessDetails[1];
+                    console.log("the business address is :" + _businessContractAddress);
+                    // now get instance of the business contract 
+                    App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
+                         businessContractInstance.getAllDeals().then(function(dealAddresses) {
+                              console.log("there are " + dealAddresses.length + " deals");
+                              dealAddresses.forEach(dealContractAddress => {
+                                   return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
+                                   
+                                        App.showTokenDetails(
+                                             _businessName, 
+                                             dealDetails[1],
+                              
+                                             );
+                                        })
+                                   
+                              });
+                    })
+                         
+                    })
+                    } 
+               });
+
+               
+          });
+          
+          });
+          
+     })
+          
+},
                          
 
 showTokenDetails: async function (_businessName, _tokenAddress) {
@@ -660,67 +659,67 @@ showTokenDetails: async function (_businessName, _tokenAddress) {
 
    // displaying all the deals and their details
 
-   displayActiveDeals: async function() {
-     
-     if (App.loading) {
-          return;
-     };
-     App.loading = true;
+displayActiveDeals: async function() {
 
-     $('#token_loadingGIF').modal({ show: true });
+if (App.loading) {
+     return;
+};
+App.loading = true;
 
-     var LoveEconomyInstance;
-     var _businessContractAddress;
-     var exchangeRate = await App.ETHtoZAR();
-     console.log("the exchange rate is currently: " + exchangeRate);
+$('#token_loadingGIF').modal({ show: true });
 
-          // get current metamask logged in 
-       // refresh account info
-       App.displayAccountInfo();
-  
-       App.contracts.LoveEconomy.deployed().then(function(instance) {
-            LoveEconomyInstance = instance;
+var LoveEconomyInstance;
+var _businessContractAddress;
+var exchangeRate = await App.ETHtoZAR();
+console.log("the exchange rate is currently: " + exchangeRate);
 
-               LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
-                    console.log("there are " + businessAddresses.length + " businesses");
-                    businessAddresses.forEach(businessWalletAddress => {
-                         return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
-                         
-                              if (businessDetails[2] != true) {
-                              console.log('This is not an active business. Customer cannot be loaded')
-                              } else {
+     // get current metamask logged in 
+     // refresh account info
+     App.displayAccountInfo();
 
-                              _businessContractAddress = businessDetails[1];
-                              console.log("the business address is :" + _businessContractAddress);
-                              // now get instance of the business contract 
-                              App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
-                                   businessContractInstance.getAllDeals().then(function(dealAddresses) {
-                                        console.log("there are " + dealAddresses.length + " deals");
-                                        dealAddresses.forEach(dealContractAddress => {
-                                             
-                                             return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
-                                                  App.showDeal(
-                                                       dealDetails[0],
-                                                       dealDetails[2],
-                                                       dealDetails[3],
-                                                       dealDetails[4],
-                                                       dealDetails[5],
-                                                       dealDetails[1],
-                                                       exchangeRate
-                                                  );
-                                             })
+     App.contracts.LoveEconomy.deployed().then(function(instance) {
+          LoveEconomyInstance = instance;
+
+          LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
+               console.log("there are " + businessAddresses.length + " businesses");
+               businessAddresses.forEach(businessWalletAddress => {
+                    return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
+                    
+                         if (businessDetails[2] != true) {
+                         console.log('This is not an active business. Customer cannot be loaded')
+                         } else {
+
+                         _businessContractAddress = businessDetails[1];
+                         console.log("the business address is :" + _businessContractAddress);
+                         // now get instance of the business contract 
+                         App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
+                              businessContractInstance.getAllDeals().then(function(dealAddresses) {
+                                   console.log("there are " + dealAddresses.length + " deals");
+                                   dealAddresses.forEach(dealContractAddress => {
                                         
-                                   });
-                         })
-                              
-                         })
-                         } 
+                                   return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
+                                        App.showDeal(
+                                             dealDetails[0],
+                                             dealDetails[2],
+                                             dealDetails[3],
+                                             dealDetails[4],
+                                             dealDetails[5],
+                                             dealDetails[1],
+                                             exchangeRate
+                                        );
+                                   })
+                                   
+                              });
+                    })
                          
-                    });
+                    })
+                    } 
+                    
                });
+          });
 
-            });
-       })
+          });
+     })
 },
 
 
