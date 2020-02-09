@@ -15,12 +15,28 @@ App = {
   },
 
   // initial connection of client side application to local blockchain
-  initWeb3: function() {
-     App.web3Provider = new Web3(Web3.givenProvider || "ws://localhost:8545");
-     App.web3Provider = web3
+//   initWeb3: function() {
+//      App.web3Provider = new Web3(Web3.givenProvider || "http://localhost:8545");
+//      App.web3Provider = web3
 
-    return App.initContract();
-  },
+//     return App.initContract();
+//   },
+
+initWeb3: function() {
+     if (typeof web3 !== 'undefined') {
+       // If a web3 instance is already provided by Meta Mask.
+       App.web3Provider = web3.currentProvider;
+       web3 = new Web3(web3.currentProvider);
+     } else {
+       // Specify default instance if no web3 instance provided
+       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+       web3 = new Web3(App.web3Provider);
+     }
+     // // Specify default instance if no web3 instance provided
+     // App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+     // web3 = new Web3(App.web3Provider);
+     return App.initContract();
+   },
 
   initContract: function () {
     $.getJSON('contracts/LoveEconomy.json', function (LoveEconomy) {
@@ -70,7 +86,7 @@ displayAccountInfo: function () {
            // if there is no error
            if (err === null) {
              // insert the balance in the p-tag with id='accountBalance'
-             $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
+             $("#accountBalance").html(web3.utils.fromWei(balance, "ether") + " ETH");
            }
          });
        }
@@ -114,9 +130,9 @@ render: function() {
      App.contracts.LoveEconomy.deployed().then(function(instance) {
           return instance.getBusinessDetails(App.account).then(function(result){
                console.log(result[1]);
-               $("currentBusinessContracts").html(" " + result[1]);
+               $("#currentBusinessContracts").html(" " + result[1]);
           }).catch(function(err){
-               $("currentBusinessContracts").html("none");
+               $("#currentBusinessContracts").html("none");
           })
      });
 
@@ -137,7 +153,7 @@ render: function() {
            // if there is no error
            if (err === null) {
              // insert the balance in the p-tag with id='accountBalance'
-             $("#accountBalance").html(web3.fromWei(balance, "ether") + " ETH");
+             $("#accountBalance").html(web3.utils.fromWei(balance, "ether") + " ETH");
            }
          });
        }
@@ -168,7 +184,7 @@ addBusiness: function () {
   var _businessAddress = $('#BusinessAddress').val();
 
      // if the name is not provided or invalid address was provided
-     if ((_businessName.trim() == '') || (web3.isAddress(_businessAddress) != true)) {
+     if ((_businessName.trim() == '') || (web3.utils.isAddress(_businessAddress) != true)) {
           // we cannot add a business
           console.log('Cannot load business because name or address is invalid')
           return false;
@@ -217,7 +233,7 @@ addDiscountCodeUser: function () {
 
      
         // if the name is not provided or invalid address was provided
-        if ((_userName.trim() == '') || (web3.isAddress(_userAddress) != true)) {
+        if ((_userName.trim() == '') || (web3.utils.isAddress(_userAddress) != true)) {
              // we cannot add a business
              console.log('Cannot load user because name or address is invalid')
              return false;
@@ -228,7 +244,7 @@ addDiscountCodeUser: function () {
      console.log('your discount bool is ' + _discountBool);
      console.log("Your discount code used is " + String(_discountCodeUsed));
 
-     // console.log("the first address is " + web3.isAddress(_userAddress));
+     // console.log("the first address is " + web3.utils.isAddress(_userAddress));
      console.log(web3_utils.soliditySha3("'"+_discountCodeUsed+"'"));
 
      App.contracts.LoveEconomy.deployed().then(function(instance) {
@@ -273,7 +289,7 @@ addDiscountCodeUser: function () {
     // console.log('User fee is (' + _userFee + ') - Please check Metamask');
 
         // if the name is not provided or invalid address was provided
-        if ((_userName.trim() == '') || (web3.isAddress(_userAddress) != true)) {
+        if ((_userName.trim() == '') || (web3.utils.isAddress(_userAddress) != true)) {
              // we cannot add a business
              console.log('Cannot load user because name or address is invalid')
              return false;
@@ -303,25 +319,26 @@ addDiscountCodeUser: function () {
    },
 
    // display all businesses if LoveEconomy is logged in 
-displayBusinessDetails: async function() {
+displayBusinessDetails: function() {
         
           var LoveEconomyInstance;
-          $('#loadingGIF').show();
           // get current metamask logged in 
           // refresh account info
           App.displayAccountInfo();
+          var current_address = App.account;
+          console.log("current address " + current_address)
      
           App.contracts.LoveEconomy.deployed().then(function(instance) {
                LoveEconomyInstance = instance;
                return LoveEconomyInstance.owner();
           }).then(function(owner){
-               if(owner == App.account) {
+              // if(owner == current_address) {
                     console.log("will display details");
                     LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
                          console.log("there are " + businessAddresses.length + " businesses");
                          businessAddresses.forEach(businessWalletAddress => {
                               
-                              LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
+                              LoveEconomyInstance.getBusinessDetails(businessWalletAddress, {from: current_address}).then(function(businessDetails){
                                    App.showBusiness(
                                         businessDetails[0],
                                         businessWalletAddress,
@@ -333,11 +350,10 @@ displayBusinessDetails: async function() {
                          });
                     });
 
-                    $('#loadingGIF').hide();
 
-               } else {
-                    console.log("Only Master Account can display businesses not " + App.Account);
-               }
+               // } else {
+               //      console.log("Only Master Account can display businesses not " + App.Account);
+               // }
           })
 
    },
@@ -355,10 +371,10 @@ SearchBusinesses: function() {
             LoveEconomyInstance = instance;
             return LoveEconomyInstance.owner();
        }).then(function(owner){
-            if(owner == App.account) {
+          //  if(owner == App.account) {
                  console.log("will display details");
                  console.log("details of " + businessSearch + " will be shown")
-                    LoveEconomyInstance.getBusinessDetails(businessSearch).then(function(businessDetails){
+                    LoveEconomyInstance.getBusinessDetails(businessSearch, {from: App.account}).then(function(businessDetails){
                          App.showBusiness(
                               businessDetails[0],
                               businessSearch,
@@ -366,14 +382,14 @@ SearchBusinesses: function() {
                               businessDetails[2]
                          );
                     });
-               } else {
-                 console.log("Only Master Account can display businesses not " + App.Account);
-            }
+          //      } else {
+          //        console.log("Only Master Account can display businesses not " + App.Account);
+          //   }
        })
 
 },
 
-showBusiness: async function (name, address, contractAddress, active) {
+showBusiness: function (name, address, contractAddress, active) {
      var businessName = name;
      var businessWallet = address;
      var businessContract = contractAddress;
@@ -436,31 +452,28 @@ payFee: function() {
 
      // get current metamask logged in 
        // refresh account info
-       App.displayAccountInfo();
+      // App.displayAccountInfo();
 
        App.contracts.LoveEconomy.deployed().then(function(instance) {
-          return instance.businessFee();
+          return instance.businessFee({from: App.account});
                }).then(function(fee) {
+                    console.log("the fee is " + fee);
                     businessFee = fee; }).then(function() {
           
           App.contracts.LocalBusiness.at(businessContract).then(function(instance) {
                businessInstance = instance;
-               return businessInstance.owner();
-
-               }).then(function(owner){
-               if(owner == web3.eth.accounts[1]) {
-                    return businessInstance.paid();
-                    } else {
-                         console.log("Only the Business contract owner can pay this fee ");
-                    }
+               
+               return businessInstance.paid({from: App.account});
+                   
                }).then(function(paid){
-                    
+                    console.log("this business variable is set to: " + paid)
+
                     if(paid == false) {
 
                               businessInstance.activateContract({
-                                   from: web3.eth.accounts[1],
+                                   from: App.account,
                                    gas: 5000000,
-                                   value: businessFee * 10**18,}).then(function(){
+                                   value: businessFee * 10**18}).then(function(){
                                    console.log("you have successfully paid 2 ether to activate your contract");
                                    businessDetails.html("You have successfully paid, please add your first deal");
                          });
@@ -513,18 +526,12 @@ addDeal: function () {
              return false;
         };
 
-   // replaced App.account with web3.eth.accounts[1] for now
      console.log('Adding deal (' + _dealName + ') - Please check Metamask');
-     console.log('Adding deal with (' + web3.eth.accounts[1] + ') account');
+     console.log('Adding deal with (' + App.account + ') account');
      console.log("the expiration date is : " + _expirationDate2);
      
      App.contracts.LoveEconomy.deployed().then(function(instance) {
-          // call the App.account function, 
-          // pass the current business address active to add a new deal
-          // instance.businessFee().then(function(fee){
-          //      businessFee = fee;
-          // })
-          return instance.getBusinessDetails(web3.eth.accounts[1]);
+          return instance.getBusinessDetails(App.account, {from: App.account});
      }).then(function(businessDetails) {
           
           if (businessDetails[2] != true) {
@@ -536,27 +543,27 @@ addDeal: function () {
           return App.contracts.LocalBusiness.at(_businessContractAddress);
      }).then(function(businessInstance){
           console.log('Adding deal ' + _dealName );
-          return businessInstance.addDeal(_dealName, _dealDetails, _expirationDate, _price, {
-               from: web3.eth.accounts[1],
-               gas: 6700000,
-            //   value: businessFee * 10 ** 18
-          });
-     }).then(function(result){
-          console.log(result.logs[0].args.businessName + ' added');
-          console.log(result.logs[0].args.businessAddress + ' added');
-          console.log(result.logs[0].args.tokenContractAddress + ' added');
-          console.log(result.logs[0].args.dealName + ' added');
-          console.log(result.logs[0].args.dealDetails + ' added');
-          console.log(result.logs[0].args.price + ' added');
-          console.log(result.logs[0].args.expiryDate + ' added');
-          console.log(result.logs[0].args.active + ' added');
-          dealContractAddress = result.logs[0].args.tokenContractAddress;
-          console.log('Deal contract address: ' + dealContractAddress);
+           businessInstance.addDeal(_dealName, _dealDetails, _expirationDate, _price, {
+                    from: App.account,
+                    gas: 5000000});
+      })
+     // .then(function(result){
+     //      console.log(result.logs[0].args.businessName + ' added');
+     //      console.log(result.logs[0].args.businessAddress + ' added');
+     //      console.log(result.logs[0].args.tokenContractAddress + ' added');
+     //      console.log(result.logs[0].args.dealName + ' added');
+     //      console.log(result.logs[0].args.dealDetails + ' added');
+     //      console.log(result.logs[0].args.price + ' added');
+     //      console.log(result.logs[0].args.expiryDate + ' added');
+     //      console.log(result.logs[0].args.active + ' added');
+     //      dealContractAddress = result.logs[0].args.tokenContractAddress;
+     //      console.log('Deal contract address: ' + dealContractAddress);
 
-          return dealContractAddress;
-          // log the error if there is one
+     //      return dealContractAddress;
+     //      // log the error if there is one
 
-     }).then(function(){
+     // })
+     .then(function(){
           alert("A new deal has been added");
      }).catch(function (error) {
           console.log(error);
@@ -585,10 +592,10 @@ App.displayAccountInfo();
 App.contracts.LoveEconomy.deployed().then(function(instance) {
      LoveEconomyInstance = instance;
 
-     LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
+     LoveEconomyInstance.getAllBusinesses({from: App.account}).then(function(businessAddresses) {
           console.log("there are " + businessAddresses.length + " businesses");
           businessAddresses.forEach(businessWalletAddress => {
-               return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
+               return LoveEconomyInstance.getBusinessDetails(businessWalletAddress, {from: App.account}).then(function(businessDetails){
                
                     if (businessDetails[2] != true) {
                     console.log('This is not an active business. Customer cannot be loaded')
@@ -599,10 +606,10 @@ App.contracts.LoveEconomy.deployed().then(function(instance) {
                     console.log("the business address is :" + _businessContractAddress);
                     // now get instance of the business contract 
                     App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
-                         businessContractInstance.getAllDeals().then(function(dealAddresses) {
+                         businessContractInstance.getAllDeals({from: App.account}).then(function(dealAddresses) {
                               console.log("there are " + dealAddresses.length + " deals");
                               dealAddresses.forEach(dealContractAddress => {
-                                   return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
+                                   return businessContractInstance.getDealDetails(dealContractAddress, {from: App.account}).then(function(dealDetails){
                                    
                                         App.showTokenDetails(
                                              _businessName, 
@@ -634,7 +641,7 @@ showTokenDetails: async function (_businessName, _tokenAddress) {
 
      console.log("the token address is " + dealContractAddress);
 
-     let dealsSold = await App.contracts.DealsToken.at(dealContractAddress).dealsBought();
+     let dealsSold = await App.contracts.DealsToken.at(dealContractAddress).dealsBought({from: App.account});
 
      let dealName = await App.contracts.DealsToken.at(dealContractAddress).dealName.call();
      
@@ -683,7 +690,7 @@ console.log("the exchange rate is currently: " + exchangeRate);
           LoveEconomyInstance.getAllBusinesses().then(function(businessAddresses) {
                console.log("there are " + businessAddresses.length + " businesses");
                businessAddresses.forEach(businessWalletAddress => {
-                    return LoveEconomyInstance.getBusinessDetails(businessWalletAddress).then(function(businessDetails){
+                    return LoveEconomyInstance.getBusinessDetails(businessWalletAddress, {from: App.account}).then(function(businessDetails){
                     
                          if (businessDetails[2] != true) {
                          console.log('This is not an active business. Customer cannot be loaded')
@@ -693,11 +700,11 @@ console.log("the exchange rate is currently: " + exchangeRate);
                          console.log("the business address is :" + _businessContractAddress);
                          // now get instance of the business contract 
                          App.contracts.LocalBusiness.at(_businessContractAddress).then(function(businessContractInstance){
-                              businessContractInstance.getAllDeals().then(function(dealAddresses) {
+                              businessContractInstance.getAllDeals({from: App.account}).then(function(dealAddresses) {
                                    console.log("there are " + dealAddresses.length + " deals");
                                    dealAddresses.forEach(dealContractAddress => {
                                         
-                                   return businessContractInstance.getDealDetails(dealContractAddress).then(function(dealDetails){
+                                   return businessContractInstance.getDealDetails(dealContractAddress, {from: App.account}).then(function(dealDetails){
                                         App.showDeal(
                                              dealDetails[0],
                                              dealDetails[2],
@@ -804,22 +811,22 @@ BuyThisItem: function (tokenContractAddress) {
        // refresh account info
        App.displayAccountInfo();
 
-        // if the name is not provided or invalid address was provided
-        if ((web3.isAddress(App.account) != true)) {
-             // we cannot add a business
-             console.log('Cannot load user because name or address is invalid')
-             return false;
-        };
+     //    // if the name is not provided or invalid address was provided
+     //    if ((web3.utils.isAddress(App.account) != true)) {
+     //         // we cannot add a business
+     //         console.log('Cannot load user because name or address is invalid')
+     //         return false;
+     //    };
 
      console.log('Purchasing deal (' + _tokenAddress + ') - Please check Metamask');
    
      App.contracts.DealsToken.at(_tokenAddress).then(function(instance) {
           buyDealInstance = instance;
 
-          return buyDealInstance._dealPrice().then(function(_dealprice) {
+          return buyDealInstance._dealPrice({from: App.account}).then(function(_dealprice) {
                console.log("the deal price is " + _dealprice);
                buyDealInstance.purchaseDeal({
-                    from: web3.eth.accounts[2], // this needs to be the users account, as only active users can pruchase tokens
+                    from: App.account, // this needs to be the users account, as only active users can pruchase tokens
                     gas: 5000000,
                     value: _dealprice * 10**18,
                });

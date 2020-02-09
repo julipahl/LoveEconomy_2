@@ -14,7 +14,7 @@
     "preinstall": "rm -rf node_modules/*/.git/",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify src/js/app.js -o src/js/bundle.js -v",
-    "build": "browserify src/js/app.js | uglifyjs -mc warnings=false > src/js/bundle.js",
+    "build": "browserify src/js/app.js > src/js/bundle.js",
     "dev": "npm run watch & nodemon server.js --host 0.0.0.0",
     "start": "node server.js",
     "truffletest": "truffle test"
@@ -24,9 +24,11 @@
   "devDependencies": {
     "browserify": "^16.5.0",
     "chai": "^4.2.0",
+    "gulp-uglify": "^3.0.2",
     "lite-server": "^2.5.4",
     "mocha": "^6.2.2",
     "nodemon": "^1.19.4",
+    "terser-webpack-plugin": "^2.3.4",
     "truffle": "5.0.0-beta.0",
     "truffle-contract": "^4.0.31",
     "uglify-js": "^3.6.0",
@@ -48,7 +50,7 @@
     "solc": "^0.6.1",
     "truffle-assertions": "^0.9.2",
     "truffle-hdwallet-provider": "^1.0.17",
-    "web3": "^1.2.5-rc.0",
+    "web3": "^1.2.6",
     "webpack": "^4.41.5"
   }
 }

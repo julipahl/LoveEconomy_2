@@ -50,8 +50,8 @@ constructor(address _businessAddress, string memory _businessName) public {
 }
 
 function activateContract() public payable {
-    require(msg.sender == owner, "Only the business contract can all this function");
-    require(msg.value >= loveEconomy.businessFee(), "the value must be bigger or equal to the business fee");
+    require(msg.sender == owner, "Only the business address can call this function");
+    require(msg.value >= loveEconomy.businessFee() * 10**18, "the value must be bigger or equal to the business fee");
     require(paid == false, "business has already paid the fee");
 
     paid = true;
@@ -83,8 +83,8 @@ function addDeal(string memory _dealName, string memory _dealDetails, uint _expi
                                                     true);
 
     emit DealCreated(businessName, msg.sender, tokenContractAddress, _dealName, _dealDetails,
-                        _price, _expiryDate, true);
-    return(tokenContractAddress);
+                       _price, _expiryDate, true);
+   return(tokenContractAddress);
 }
 
 // function to return the number of deals created by the business
