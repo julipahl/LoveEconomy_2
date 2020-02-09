@@ -612,7 +612,7 @@ App.contracts.LoveEconomy.deployed().then(function(instance) {
                                    return businessContractInstance.getDealDetails(dealContractAddress, {from: App.account}).then(function(dealDetails){
                                    
                                         App.showTokenDetails(
-                                             _businessName, 
+                                             dealDetails[0], 
                                              dealDetails[1],
                               
                                              );
