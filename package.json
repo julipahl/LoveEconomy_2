@@ -35,7 +35,7 @@
     "watchify": "^3.11.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^2.4.0",
+    "@openzeppelin/contracts": "^4.4.2",
     "@types/node": "^13.1.8",
     "datejs": "^1.0.0-rc3",
     "ejs": "^3.0.1",
